@@ -59,6 +59,7 @@ def close_db(exc=None):
 
 
 def init_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True) if os.path.dirname(DB_PATH) else None
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
     cur.executescript("""
@@ -582,4 +583,4 @@ def create_user():
 if __name__ == "__main__":
     init_db()
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug_mode, host="127.0.0.1", port=5000)
+    app.run(debug=debug_mode, host="0.0.0.0", port=5000)
