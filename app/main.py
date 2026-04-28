@@ -12,11 +12,26 @@ from flask import Flask, request, jsonify, g, Response
 from functools import wraps
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask import send_from_directory
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()
 
 app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return send_from_directory("../frontend", "index.html")
+
 CORS(app)
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=[]
+)
+
 #1. нововведения (1-x) которые будут добавлены в p5
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
@@ -42,6 +57,12 @@ logger = logging.getLogger(__name__)
 def request_too_large(e):
     logger.warning("Request body too large from %s", request.remote_addr)
     return jsonify({"error": "Request body too large"}), 413
+
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    logger.warning("RATE_LIMIT: ip=%s path=%s", request.remote_addr, request.path)
+    return jsonify({"error": "Too many requests. Try again later."}), 429
+
 #2
 
 def get_db():
@@ -188,10 +209,17 @@ def require_role(*roles):
         def wrapper(*args, **kwargs):
             if g.current_user.get("role") not in roles:
                 logger.warning(
-                    "Access denied: user=%s role=%s path=%s",
+                    "ACCESS_DENIED: user=%s role=%s path=%s method=%s ip=%s",
                     g.current_user.get("username"),
                     g.current_user.get("role"),
-                    request.path
+                    request.path,
+                    request.method,
+                    request.remote_addr
+                )
+                audit(
+                    "ACCESS_DENIED",
+                    detail=f"path={request.path} role={g.current_user.get('role')}",
+                    user_id=g.current_user.get("id")
                 )
                 return jsonify({"error": "Forbidden"}), 403
             return f(*args, **kwargs)
@@ -238,7 +266,7 @@ def validate_int(value, field_name):
         return None, f"{field_name} must be a positive integer"
     
 @app.route("/login", methods=["POST"])
-
+@limiter.limit("10 per minute")
 def login():
     data = request.get_json(silent=True) or {}
     username = str(data.get("username", "")).strip()[:64]
@@ -564,6 +592,10 @@ def create_user():
     password = str(data.get("password", ""))
     if not password or len(password) < 8:
         return jsonify({"error": "password must be at least 8 characters"}), 400
+    if not any(c.isupper() for c in password):
+        return jsonify({"error": "password must contain at least one uppercase letter"}), 400
+    if not any(c.isdigit() for c in password):
+        return jsonify({"error": "password must contain at least one digit"}), 400
     if len(password) > MAX_PASSWORD_LEN:
         return jsonify({"error": "password too long"}), 400
 
