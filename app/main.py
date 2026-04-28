@@ -633,10 +633,17 @@ def create_user():
 if __name__ == "__main__":
     init_db()
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    cert = pathlib.Path("localhost+1.pem")
-    key  = pathlib.Path("localhost+1-key.pem")
-    if cert.exists() and key.exists():
-        app.run(debug=debug_mode, host="0.0.0.0", port=5000,
-            ssl_context=(str(cert), str(key)))
+    cert_paths = [
+    (pathlib.Path("localhost+1.pem"), pathlib.Path("localhost+1-key.pem")),
+    (pathlib.Path("certs/cert.pem"), pathlib.Path("certs/key.pem")),
+    ]
+    ssl_ctx = None
+    for cert, key in cert_paths:
+       if cert.exists() and key.exists():
+           ssl_ctx = (str(cert), str(key))
+           break
+
+    if ssl_ctx:
+       app.run(debug=debug_mode, host="0.0.0.0", port=5000, ssl_context=ssl_ctx)
     else:
-        app.run(debug=debug_mode, host="0.0.0.0", port=5000)
+       app.run(debug=debug_mode, host="0.0.0.0", port=5000)
