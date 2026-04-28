@@ -2,11 +2,13 @@ import sqlite3
 import os
 import logging
 import datetime
+import hmac
 
 import bcrypt
 import jwt
 import csv
 import io
+import pathlib
 
 from flask import Flask, request, jsonify, g, Response
 from functools import wraps
@@ -119,9 +121,9 @@ def init_db():
     conn.commit()
     # Начальные пользователи
     users = [
-        ("admin", "admin123", "admin"),
-        ("engineer1", "engineer1", "engineer"),
-        ("operator1", "operator1", "operator"),
+    ("admin",     os.environ.get("ADMIN_PASSWORD",    "admin123"),    "admin"),
+    ("engineer1", os.environ.get("ENGINEER_PASSWORD", "engineer1"),   "engineer"),
+    ("operator1", os.environ.get("OPERATOR_PASSWORD", "operator1"),   "operator"),
     ]
     for username, password, role in users:
         exists = cur.execute(
@@ -284,7 +286,11 @@ def login():
         (username,)
     ).fetchone()
 
-    if not row or not bcrypt.checkpw(password.encode(), row["password_hash"].encode()):
+    if not row:
+    # Фиктивная проверка чтобы время ответа было одинаковым
+        bcrypt.checkpw(password.encode(), b"$2b$12$fakehashfortimingprotection123456")
+        return jsonify({"error": "Invalid credentials"}), 401
+    if not bcrypt.checkpw(password.encode(), row["password_hash"].encode()):
         logger.warning("Failed login: %s", username)
         return jsonify({"error": "Invalid credentials"}), 401
 
@@ -627,4 +633,10 @@ def create_user():
 if __name__ == "__main__":
     init_db()
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug_mode, host="0.0.0.0", port=5000)
+    cert = pathlib.Path("localhost+1.pem")
+    key  = pathlib.Path("localhost+1-key.pem")
+    if cert.exists() and key.exists():
+        app.run(debug=debug_mode, host="0.0.0.0", port=5000,
+            ssl_context=(str(cert), str(key)))
+    else:
+        app.run(debug=debug_mode, host="0.0.0.0", port=5000)
