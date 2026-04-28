@@ -11,11 +11,12 @@ import io
 from flask import Flask, request, jsonify, g, Response
 from functools import wraps
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv()
 
 app = Flask(__name__)
-
+CORS(app)
 #1. нововведения (1-x) которые будут добавлены в p5
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
@@ -539,6 +540,17 @@ def export_report_csv():
             "X-Content-Type-Options": "nosniff",
         }
     )
+
+@app.route("/admin/users", methods=["GET"])
+@require_auth
+@require_role("admin")
+def list_users():
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, username, role FROM users ORDER BY id"
+    ).fetchall()
+    audit("LIST_USERS", user_id=g.current_user["id"])
+    return jsonify([dict(r) for r in rows])
 
 @app.route("/admin/users", methods=["POST"])
 @require_auth
