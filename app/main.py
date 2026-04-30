@@ -3,6 +3,9 @@ import os
 import logging
 import datetime
 import hmac
+import pyotp
+from cryptography.fernet import Fernet
+
 
 import bcrypt
 import jwt
@@ -17,6 +20,23 @@ from flask_cors import CORS
 from flask import send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+AUDIT_KEY = os.environ.get("AUDIT_ENCRYPTION_KEY")
+_fernet = Fernet(AUDIT_KEY.encode()) if AUDIT_KEY else None
+
+def encrypt_audit(text):
+    if _fernet and text:
+        return _fernet.encrypt(text.encode()).decode()
+    return text
+
+def decrypt_audit(text):
+    if _fernet and text:
+        try:
+            return _fernet.decrypt(text.encode()).decode()
+        except Exception:
+            return text
+    return text
+
 
 load_dotenv()
 
@@ -91,7 +111,8 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            role TEXT NOT NULL
+            role TEXT NOT NULL,
+            totp_secret TEXT
         );
         CREATE TABLE IF NOT EXISTS equipment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,6 +137,11 @@ def init_db():
             entity_id INTEGER,
             detail TEXT,
             ts TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS revoked_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            jti TEXT UNIQUE NOT NULL,
+            revoked_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
     """)
     conn.commit()
@@ -161,9 +187,8 @@ def audit(action, entity=None, entity_id=None, detail=None, user_id=None):
     try:
         db = get_db()
         db.execute(
-            "INSERT INTO audit_log (user_id, action, entity, entity_id, detail)"
-            " VALUES (?,?,?,?,?)",
-            (user_id, action, entity, entity_id, detail)
+            "INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?,?,?,?,?)",
+            (user_id, action, entity, entity_id, encrypt_audit(detail))
         )
         db.commit()
     except sqlite3.Error as e:
@@ -172,10 +197,12 @@ def audit(action, entity=None, entity_id=None, detail=None, user_id=None):
         logger.error("audit error (unexpected): %s", type(e).__name__)
 
 def create_token(user_id, username, role):
+    import uuid
     payload = {
         "id": user_id,
         "username": username,
         "role": role,
+        "jti": str(uuid.uuid4()),
         "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -183,9 +210,16 @@ def create_token(user_id, username, role):
 
 def decode_token(token):
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-    except jwt.ExpiredSignatureError:
-        return None
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        jti = payload.get("jti")
+        if jti:
+            db = get_db()
+            revoked = db.execute(
+                "SELECT 1 FROM revoked_tokens WHERE jti=?", (jti,)
+            ).fetchone()
+            if revoked:
+                return None
+        return payload
     except jwt.InvalidTokenError:
         return None
 
@@ -282,7 +316,7 @@ def login():
 
     db = get_db()
     row = db.execute(
-        "SELECT id, username, password_hash, role FROM users WHERE username=?",
+        "SELECT id, username, password_hash, role, totp_secret FROM users WHERE username=?",
         (username,)
     ).fetchone()
 
@@ -293,6 +327,15 @@ def login():
     if not bcrypt.checkpw(password.encode(), row["password_hash"].encode()):
         logger.warning("Failed login: %s", username)
         return jsonify({"error": "Invalid credentials"}), 401
+    
+    if row["totp_secret"]:
+        totp_code = data.get("totp_code", "")
+        if not totp_code:
+            return jsonify({"error": "TOTP code required", "totp_required": True}), 401
+        totp = pyotp.TOTP(row["totp_secret"])
+        if not totp.verify(totp_code):
+            logger.warning("Failed TOTP: %s", row["username"])
+            return jsonify({"error": "Invalid TOTP code"}), 401
 
     token = create_token(row["id"], row["username"], row["role"])
     audit("LOGIN", user_id=row["id"])
@@ -615,7 +658,7 @@ def create_user():
         "SELECT 1 FROM users WHERE username=?", (username,)
     ).fetchone()
     if exists:
-        return jsonify({"error": "Username already taken"}), 409
+        return jsonify({"error": "User creation failed"}), 409
 
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     cur = db.execute(
@@ -629,6 +672,49 @@ def create_user():
     logger.info("User created: %s role=%s by %s",
                 username, role, g.current_user["username"])
     return jsonify({"id": new_id, "username": username, "role": role}), 201
+
+@app.route("/logout", methods=["POST"])
+@require_auth
+def logout():
+    jti = g.current_user.get("jti")
+    if jti:
+        db = get_db()
+        try:
+            db.execute(
+                "INSERT OR IGNORE INTO revoked_tokens (jti) VALUES (?)", (jti,)
+            )
+            db.commit()
+            audit("LOGOUT", user_id=g.current_user.get("id"))
+        except sqlite3.Error as e:
+            logger.error("logout error: %s", e)
+            return jsonify({"error": "Logout failed"}), 500
+    return jsonify({"message": "Logged out successfully"})
+
+@app.route("/admin/users/<int:user_id>/totp", methods=["POST"])
+@require_auth
+@require_role("admin")
+def setup_totp(user_id):
+    db = get_db()
+    user = db.execute(
+        "SELECT id, username FROM users WHERE id=?", (user_id,)
+    ).fetchone()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    secret = pyotp.random_base32()
+    db.execute(
+        "UPDATE users SET totp_secret=? WHERE id=?", (secret, user_id)
+    )
+    db.commit()
+    totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=user["username"],
+        issuer_name="OilGasMMS"
+    )
+    audit("TOTP_SETUP", "user", user_id, user_id=g.current_user["id"])
+    return jsonify({
+        "secret": secret,
+        "totp_uri": totp_uri,
+        "message": "Scan QR code with Google Authenticator"
+    })
 
 if __name__ == "__main__":
     init_db()
