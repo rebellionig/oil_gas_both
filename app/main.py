@@ -2,7 +2,6 @@ import sqlite3
 import os
 import logging
 import datetime
-import hmac
 import pyotp
 from cryptography.fernet import Fernet
 
