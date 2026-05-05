@@ -9,6 +9,9 @@ services:
       - JWT_SECRET_KEY=actuallykindalongenoughsecretkey
       - DB_PATH=/app/data/oil_gas.db
       - FLASK_DEBUG=false
+      - ADMIN_PASSWORD=admin123
+      - ENGINEER_PASSWORD=engineer1
+      - OPERATOR_PASSWORD=operator1
     volumes:
       - db_data:/app/data
     restart: unless-stopped

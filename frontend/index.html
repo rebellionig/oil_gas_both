@@ -477,11 +477,11 @@
         <div id="login-alert" class="alert alert-error"></div>
         <div class="field">
           <label>Логин</label>
-          <input id="login-user" type="text" value="engineer1" autocomplete="off">
+          <input id="login-user" type="text" value="Логин" autocomplete="off">
         </div>
         <div class="field">
           <label>Пароль</label>
-          <input id="login-pass" type="password" value="engineer1">
+          <input id="login-pass" type="password" value="Пароль">
         </div>
         <button class="btn btn-primary" onclick="doLogin()">ВОЙТИ В СИСТЕМУ</button>
         <div style="margin-top:16px; font-family:var(--mono); font-size:10px; color:var(--text3)">
@@ -587,7 +587,7 @@
     <div class="panel">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>ID</th><th>Логин</th><th>Роль</th></tr></thead>
+          <thead><tr><th>ID</th><th>Логин</th><th>Роль</th><th>Действия</th></tr></thead>
           <tbody id="users-tbody"></tbody>
         </table>
       </div>
@@ -785,7 +785,7 @@
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-const API_SECURE = 'http://127.0.0.1:5000';
+const API_SECURE = 'https://127.0.0.1:5000';
 const API_VULN   = 'http://127.0.0.1:5003';
 
 let token    = null;
@@ -846,6 +846,8 @@ function onLoggedIn() {
 
 function logout() {
   token = null; userRole = null; username = null;
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
   document.getElementById('user-badge').style.display = 'none';
   document.getElementById('logout-btn').style.display = 'none';
   document.getElementById('status-dot').classList.remove('online');
@@ -1176,6 +1178,7 @@ async function loadUsers() {
         <td style="font-family:var(--mono);color:var(--text3)">${u.id}</td>
         <td style="font-weight:500">${u.username}</td>
         <td><span class="badge badge-${u.role}">${u.role}</span></td>
+        <td>${u.username !== username ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${u.username}')">Удалить</button>` : '<span style="color:var(--text3);font-size:11px;font-family:var(--mono)">—</span>'}</td>
       </tr>`).join('') :
       `<tr><td colspan="3"><div class="empty">Нет пользователей</div></td></tr>`;
   } else {
@@ -1202,6 +1205,16 @@ async function addUser() {
   } else {
     al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
     al.className   = 'alert alert-error show';
+  }
+}
+
+async function deleteUser(userId, userName) {
+  if (!confirm(`Удалить пользователя ${userName}?`)) return;
+  const { ok, status, data } = await api('DELETE', `${API_SECURE}/admin/users/${userId}`);
+  if (ok) {
+    loadUsers();
+  } else {
+    alert(`[${status}] ${data.error || 'Ошибка'}`);
   }
 }
 

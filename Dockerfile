@@ -9,7 +9,9 @@ COPY app/ ./app/
 COPY certs/ ./certs/
 COPY frontend/ ./frontend/
 COPY .env.example .env
-
+COPY seed_data.py .
 EXPOSE 5000
 
-CMD ["python", "app/main.py"]
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+CMD ["./entrypoint.sh"]

@@ -717,6 +717,25 @@ def setup_totp(user_id):
         "message": "Scan QR code with Google Authenticator"
     })
 
+@app.route("/admin/users/<int:user_id>", methods=["DELETE"])
+@require_auth
+@require_role("admin")
+def delete_user(user_id):
+    if user_id == g.current_user["id"]:
+        return jsonify({"error": "Cannot delete yourself"}), 400
+    db = get_db()
+    user = db.execute(
+        "SELECT id, username FROM users WHERE id=?", (user_id,)
+    ).fetchone()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    db.execute("DELETE FROM users WHERE id=?", (user_id,))
+    db.commit()
+    audit("DELETE_USER", "user", user_id,
+          f"username={user['username']}", user_id=g.current_user["id"])
+    logger.info("User deleted: %s by %s", user["username"], g.current_user["username"])
+    return jsonify({"message": f"User {user['username']} deleted"})
+
 if __name__ == "__main__":
     init_db()
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
