@@ -5,6 +5,9 @@ import time
 import json
 import urllib.request
 
+if os.path.exists("test_oil_gas.db"):
+    os.remove("test_oil_gas.db")
+
 os.environ.setdefault("JWT_SECRET_KEY", "actuallykindalongenoughsecretkey")
 os.environ.setdefault("DB_PATH", "test_oil_gas.db")
 
