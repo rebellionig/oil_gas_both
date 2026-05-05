@@ -145,15 +145,15 @@ except urllib.error.HTTPError as e:
 results.append(("GET /report/csv operator → 403", c_csv2, c_csv2 == 403, ""))
 
 # admin создаёт пользователя
-r, c = post("/admin/users", {"username": "neweng", "password": "password123", "role": "engineer"}, adm)
+r, c = post("/admin/users", {"username": "neweng", "password": "Password123", "role": "engineer"}, adm)
 results.append(("POST /admin/users → 201", c, c == 201, r))
 
 # engineer не может создать пользователя
-r, c = post("/admin/users", {"username": "hack", "password": "password123", "role": "admin"}, eng)
+r, c = post("/admin/users", {"username": "hack", "password": "Password123", "role": "admin"}, eng)
 results.append(("engineer POST /admin/users → 403", c, c == 403, ""))
 
 # Неверная роль при создании
-r, c = post("/admin/users", {"username": "test99", "password": "password123", "role": "superuser"}, adm)
+r, c = post("/admin/users", {"username": "test99", "password": "Password123", "role": "superuser"}, adm)
 results.append(("invalid role → 400", c, c == 400, ""))
 
 # Тело > 16KB → 413
