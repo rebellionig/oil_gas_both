@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 COPY certs/ ./certs/
+COPY frontend/ ./frontend/
 COPY .env.example .env
 
 EXPOSE 5000
