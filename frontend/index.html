@@ -694,6 +694,30 @@
           </div>
         </div>
 
+        <!-- CWE-613 logout -->
+        <div class="panel">
+          <div class="panel-head">CWE-613 — Инвалидация JWT <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+              Токен остаётся активным после logout (нет revoked_tokens)
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE613()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-613-out" class="console" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- CWE-613 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-613 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+              После logout токен инвалидируется → 401 при повторном использовании
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE613Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-613f-out" class="console" style="display:none"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1403,6 +1427,61 @@ async function markAllRead() {
   }
 }
 
+async function demoCWE613() {
+  const out = document.getElementById('demo-613-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин на уязвимой версии (порт 5003)...';
+  try {
+    const r1 = await fetch('http://127.0.0.1:5003/login', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
+    out.textContent += '\nВыход из системы (logout)...';
+    await fetch('http://127.0.0.1:5003/logout', {
+      method: 'POST', headers: {'Authorization': `Bearer ${tok}`}
+    });
+    out.textContent += '\n✓ Logout выполнен';
+    out.textContent += '\nИспользуем старый токен после logout...';
+    const r2 = await fetch('http://127.0.0.1:5003/equipment', {
+      headers: {'Authorization': `Bearer ${tok}`}
+    });
+    const d2 = await r2.json();
+    out.textContent += `\n⚠ УЯЗВИМОСТЬ: статус ${r2.status} — ${JSON.stringify(d2).substring(0,60)}`;
+  } catch(e) {
+    out.textContent += `\nОшибка: ${e.message}`;
+  }
+}
+
+async function demoCWE613Fixed() {
+  const out = document.getElementById('demo-613f-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API_SECURE}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
+    out.textContent += '\nВыход из системы (logout)...';
+    await fetch(`${API_SECURE}/logout`, {
+      method: 'POST', headers: {'Authorization': `Bearer ${tok}`}
+    });
+    out.textContent += '\n✓ Logout выполнен — токен инвалидирован';
+    out.textContent += '\nИспользуем старый токен после logout...';
+    const r2 = await fetch(`${API_SECURE}/equipment`, {
+      headers: {'Authorization': `Bearer ${tok}`}
+    });
+    const d2 = await r2.json();
+    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
+  } catch(e) {
+    out.textContent += `\nОшибка: ${e.message}`;
+  }
+}
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function badgeStatus(s) {
   const map = { open:'badge-open', in_progress:'badge-progress', on_hold:'badge-hold', closed:'badge-closed' };
