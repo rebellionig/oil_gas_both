@@ -550,7 +550,7 @@ def assign_work_order(order_id):
 
     db = get_db()
     order = db.execute(
-        "SELECT id, status FROM work_orders WHERE id=?", (order_id,)
+        "SELECT id, status, description FROM work_orders WHERE id=?", (order_id,)
     ).fetchone()
     if not order:
         return jsonify({"error": "Work order not found"}), 404
