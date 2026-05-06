@@ -757,6 +757,27 @@
   </div>
 </div>
 
+<!-- MODAL: назначить инженера -->
+<div class="modal-overlay" id="modal-assign">
+  <div class="modal">
+    <div class="modal-head">
+      Назначить инженера
+      <button class="modal-close" onclick="closeModal('modal-assign')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="assign-modal-alert" class="alert"></div>
+      <div class="field">
+        <label>Инженер</label>
+        <select id="assign-engineer"></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-assign')">Отмена</button>
+      <button class="btn btn-primary btn-sm" onclick="doAssign()">НАЗНАЧИТЬ</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: изменить статус -->
 <div class="modal-overlay" id="modal-status">
   <div class="modal">
@@ -955,6 +976,7 @@ async function loadWorkOrders() {
       <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.created_at?.slice(0,16)||'—'}</td>
       <td>${w.status !== 'closed' && userRole !== 'operator' ? `
         <button class="btn btn-outline btn-sm" onclick="openStatusModal(${w.id})" style="margin-right:4px">Статус</button>
+        ${userRole === 'admin' ? `<button class="btn btn-outline btn-sm" onclick="openAssignModal(${w.id})" style="margin-right:4px">Назначить</button>` : ''}
         <button class="btn btn-danger btn-sm" onclick="closeOrder(${w.id})">Закрыть</button>
       ` : '<span style="color:var(--text3);font-size:11px;font-family:var(--mono)">—</span>'}</td>
     </tr>`).join('') :
@@ -1217,6 +1239,34 @@ async function deleteUser(userId, userName) {
     alert(`[${status}] ${data.error || 'Ошибка'}`);
   }
 }
+
+async function openAssignModal(orderId) {
+  selectedOrderId = orderId;
+  document.getElementById('assign-modal-alert').className = 'alert';
+  const { ok, data } = await api('GET', `${API_SECURE}/admin/users`);
+  if (ok) {
+    const engineers = data.filter(u => u.role === 'engineer');
+    document.getElementById('assign-engineer').innerHTML = engineers.map(u =>
+      `<option value="${u.id}">${u.username}</option>`).join('');
+  }
+  openModal('modal-assign');
+}
+
+async function doAssign() {
+  const engineerId = document.getElementById('assign-engineer').value;
+  const al = document.getElementById('assign-modal-alert');
+  const { ok, status, data } = await api('POST',
+    `${API_SECURE}/work-orders/${selectedOrderId}/assign`,
+    { engineer_id: parseInt(engineerId) });
+  if (ok) {
+    closeModal('modal-assign');
+    loadWorkOrders();
+  } else {
+    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
+    al.className = 'alert alert-error show';
+  }
+}
+
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function badgeStatus(s) {
