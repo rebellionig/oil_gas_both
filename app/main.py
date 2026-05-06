@@ -322,6 +322,7 @@ def login():
     if len(password) > MAX_PASSWORD_LEN:
         return jsonify({"error": "Invalid credentials"}), 401
 
+
     db = get_db()
     row = db.execute(
         "SELECT id, username, password_hash, role, totp_secret FROM users WHERE username=?",
@@ -827,3 +828,28 @@ if __name__ == "__main__":
        app.run(debug=debug_mode, host="0.0.0.0", port=5000, ssl_context=ssl_ctx)
     else:
        app.run(debug=debug_mode, host="0.0.0.0", port=5000)
+
+# CWE-89 from 326-329, 380, 406, 411, fixed using execute("?",(v,)) - parameterized queries
+# CWE-916 from 167-169, 679, 781 fixed by using bcrypt.hashpw(..., bcrypt.gensalt())
+# CWE-798 from 66-68, fixed by using SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+# CWE-306 from 354, 366, 392, 424, fixed by using @require_auth, decorator
+# CWE-285 from 367, 393, 435, 519, fixed: @require_role("admin", "engineer")
+# CWE-532 from 350, 688, fixed: logger.info("User logged in: %s", row["username"]) only username
+# CWE-489 from 815, debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+
+# CWE-400 from 59, fixed: app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+# CWE-307 from 62, 322-323 MAX_PASSWORD_LEN = 128 and validate_text(..., max_len=MAX_PASSWORD_LEN)
+# CWE-863 from 273-290, 473-475, 502-504 fixed by: check_object_access()
+# CWE-693 from 536-537, 632-633 fixed: Content-Disposition, X-Content-Type-Options
+# CWE-1236 from 614 fix: csv.writer(output, quoting=csv.QUOTE_ALL)
+
+# A04 Bruteforce from 52-56, 313, fix: limiter = Limiter(...) + @limiter.limit("10 per minute")
+# CWE-521 from 658-665 fixed: isupper(), isdigit(), len >=8
+# CWE-778 from 194-205, 255-267 audit() with IP, method, action
+# CWE-208 from 332-334: bcrypt.checkpw(...) with fake hash for timing attack protection
+# CWE-319 from 816-827 ssl_ctx = (cert,key) + mkcert
+# CWE-798 from 158-160 from os.environ.get("admin_password") instead of hardcoded
+# CWE-613 from 142-146, 207-216, 219-232, 692-707: revoked_tokens + jti + /logout
+# CWE-862 from 5,116,339-346, 709-733: pyotp.totp.verify() + totp_secret
+# CWE-312 from 23-37, 199: fernet + encrypt_audit() for audit log details
+# Account enum from 677, "User creation failed" instead "Username already taken"
