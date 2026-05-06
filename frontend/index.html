@@ -440,6 +440,9 @@
   <div class="header-right">
     <div class="status-dot" id="status-dot"></div>
     <span id="user-badge"></span>
+    <button id="notif-btn" onclick="toggleNotifications()" style="display:none;background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;font-family:var(--mono);font-size:11px;cursor:pointer;position:relative;">
+      🔔 <span id="notif-count" style="display:none;background:var(--red);color:#fff;border-radius:50%;padding:1px 5px;font-size:10px;position:absolute;top:-4px;right:-4px;">0</span>
+    </button>
     <button id="logout-btn" onclick="logout()">ВЫХОД</button>
   </div>
 </header>
@@ -461,6 +464,9 @@
     </div>
     <div class="nav-item" onclick="showView('users')" id="nav-users">
       <span class="icon">👤</span> Пользователи
+    </div>
+    <div class="nav-item" onclick="openModal('modal-change-password')" id="nav-password">
+      <span class="icon">🔑</span> Сменить пароль
     </div>
     <div class="nav-section" style="margin-top:16px">Безопасность</div>
     <div class="nav-item" onclick="showView('security')" id="nav-security">
@@ -542,15 +548,26 @@
           <div class="page-title">Заявки на ТО</div>
           <div class="page-sub">WORK ORDERS</div>
         </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="filter-status" onchange="loadWorkOrders()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;">
+          <option value="">Все статусы</option>
+          <option value="open">open</option>
+          <option value="in_progress">in_progress</option>
+          <option value="on_hold">on_hold</option>
+          <option value="closed">closed</option>
+        </select>
         <button class="btn btn-outline btn-sm" id="btn-add-wo" onclick="openModal('modal-add-wo')">+ СОЗДАТЬ</button>
       </div>
+    </div>
+    
       <div class="panel">
         <div class="table-wrap">
           <table>
             <thead><tr><th>#</th><th>Оборудование ID</th><th>Описание</th><th>Статус</th><th>Создано</th><th>Действия</th></tr></thead>
             <tbody id="wo-tbody"></tbody>
-          </table>
+          </table>  
         </div>
+        <div id="wo-pagination" style="display:flex;justify-content:center;gap:8px;padding:16px;border-top:1px solid var(--border);"></div>
       </div>
     </div>
 
@@ -757,6 +774,26 @@
   </div>
 </div>
 
+<!-- MODAL: смена пароля -->
+<div class="modal-overlay" id="modal-change-password">
+  <div class="modal">
+    <div class="modal-head">
+      Сменить пароль
+      <button class="modal-close" onclick="closeModal('modal-change-password')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="pwd-modal-alert" class="alert"></div>
+      <div class="field"><label>Текущий пароль</label><input id="old-password" type="password"></div>
+      <div class="field"><label>Новый пароль</label><input id="new-password" type="password"></div>
+      <div class="field"><label>Повторите новый пароль</label><input id="confirm-password" type="password"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-change-password')">Отмена</button>
+      <button class="btn btn-primary btn-sm" onclick="doChangePassword()">СОХРАНИТЬ</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: назначить инженера -->
 <div class="modal-overlay" id="modal-assign">
   <div class="modal">
@@ -813,6 +850,8 @@ let token    = null;
 let userRole = null;
 let username = null;
 let selectedOrderId = null;
+let woCurrentPage = 1;
+const WO_PER_PAGE = 20;
 
 // ── API HELPER ───────────────────────────────────────────────────────────────
 async function api(method, url, body, useToken = true) {
@@ -854,6 +893,9 @@ function onLoggedIn() {
     `<span>${username}</span> · <span style="color:var(--text2)">${userRole}</span>`;
   document.getElementById('logout-btn').style.display = 'inline';
   document.getElementById('status-dot').classList.add('online');
+  document.getElementById('notif-btn').style.display = 'inline';
+  loadNotifications();
+  setInterval(loadNotifications, 30000);
 
   // скрыть кнопки недоступные для роли
   if (userRole === 'operator') {
@@ -872,6 +914,9 @@ function logout() {
   document.getElementById('user-badge').style.display = 'none';
   document.getElementById('logout-btn').style.display = 'none';
   document.getElementById('status-dot').classList.remove('online');
+  document.getElementById('notif-btn').style.display = 'none';
+  document.getElementById('notif-panel').style.display = 'none';
+  document.getElementById('notif-count').style.display = 'none';
   document.getElementById('view-login').style.display = 'flex';
   hideAllViews();
 }
@@ -964,10 +1009,19 @@ async function addEquipment() {
 
 // ── WORK ORDERS ───────────────────────────────────────────────────────────────
 async function loadWorkOrders() {
-  const { ok, data } = await api('GET', `${API_SECURE}/work-orders`);
-  const tbody = document.getElementById('wo-tbody');
+  const filterStatus = document.getElementById('filter-status')?.value || '';
+  const url = filterStatus ? `${API_SECURE}/work-orders?status=${filterStatus}` : `${API_SECURE}/work-orders`;
+  const { ok, data } = await api('GET', url);
   if (!ok) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red)">${data.error||'Ошибка'}</td></tr>`; return; }
-  tbody.innerHTML = data.length ? data.map(w => `
+
+  const totalPages = Math.ceil(data.length / WO_PER_PAGE);
+  if (woCurrentPage > totalPages) woCurrentPage = 1;
+  const start = (woCurrentPage - 1) * WO_PER_PAGE;
+  const pageData = data.slice(start, start + WO_PER_PAGE);
+
+  const tbody = document.getElementById('wo-tbody');
+  
+  tbody.innerHTML = pageData.length ? pageData.map(w => `
     <tr>
       <td style="font-family:var(--mono);color:var(--text3)">#${w.id}</td>
       <td style="font-family:var(--mono)">${w.equipment_id}</td>
@@ -981,6 +1035,16 @@ async function loadWorkOrders() {
       ` : '<span style="color:var(--text3);font-size:11px;font-family:var(--mono)">—</span>'}</td>
     </tr>`).join('') :
     `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div>Заявок нет</div></td></tr>`;
+    
+    const pagination = document.getElementById('wo-pagination');
+    if (totalPages > 1) {
+      pagination.innerHTML = Array.from({length: totalPages}, (_, i) => `
+        <button onclick="woCurrentPage=${i+1};loadWorkOrders()" class="btn btn-sm ${woCurrentPage===i+1?'btn-primary':'btn-outline'}">${i+1}</button>
+      `).join('');
+    } else {
+      pagination.innerHTML = '';
+    }
+
 }
 
 async function createWorkOrder() {
@@ -1267,6 +1331,80 @@ async function doAssign() {
   }
 }
 
+async function doChangePassword() {
+  const oldPwd = document.getElementById('old-password').value;
+  const newPwd = document.getElementById('new-password').value;
+  const confirmPwd = document.getElementById('confirm-password').value;
+  const al = document.getElementById('pwd-modal-alert');
+  al.className = 'alert';
+
+  if (newPwd !== confirmPwd) {
+    al.textContent = 'Новые пароли не совпадают';
+    al.className = 'alert alert-error show';
+    return;
+  }
+
+  const { ok, status, data } = await api('POST',
+    `${API_SECURE}/users/change-password`,
+    { old_password: oldPwd, new_password: newPwd });
+
+  if (ok) {
+    closeModal('modal-change-password');
+    document.getElementById('old-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+    alert('Пароль успешно изменён');
+  } else {
+    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
+    al.className = 'alert alert-error show';
+  }
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+async function loadNotifications() {
+  const { ok, data } = await api('GET', `${API_SECURE}/notifications`);
+  if (!ok) return;
+  const unread = data.filter(n => !n.is_read).length;
+  const countEl = document.getElementById('notif-count');
+  if (unread > 0) {
+    countEl.textContent = unread;
+    countEl.style.display = 'inline';
+  } else {
+    countEl.style.display = 'none';
+  }
+  const list = document.getElementById('notif-list');
+  list.innerHTML = data.length ? data.map(n => `
+    <div onclick="readNotif(${n.id}, this)" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read ? 'transparent' : 'rgba(245,166,35,0.05)'}">
+      <div style="font-size:12px;color:${n.is_read ? 'var(--text2)' : 'var(--text)'}">${n.message}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">${n.created_at?.slice(0,16)||''}</div>
+    </div>`).join('') :
+    '<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)">Нет уведомлений</div>';
+}
+
+function toggleNotifications() {
+  const panel = document.getElementById('notif-panel');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    loadNotifications();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+async function readNotif(id, el) {
+  await api('POST', `${API_SECURE}/notifications/${id}/read`, {});
+  el.style.background = 'transparent';
+  loadNotifications();
+}
+
+async function markAllRead() {
+  const { ok, data } = await api('GET', `${API_SECURE}/notifications`);
+  if (ok) {
+    await Promise.all(data.filter(n => !n.is_read).map(n =>
+      api('POST', `${API_SECURE}/notifications/${n.id}/read`, {})));
+    loadNotifications();
+  }
+}
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function badgeStatus(s) {
@@ -1279,5 +1417,14 @@ document.getElementById('login-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 </script>
+<!-- NOTIFICATIONS PANEL -->
+<div id="notif-panel" style="display:none;position:fixed;top:60px;right:16px;width:320px;background:var(--panel);border:1px solid var(--border);z-index:300;max-height:400px;overflow-y:auto;">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);display:flex;justify-content:space-between;align-items:center;">
+    Уведомления
+    <button onclick="markAllRead()" style="background:none;border:none;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;letter-spacing:1px;">ПРОЧИТАТЬ ВСЕ</button>
+  </div>
+  <div id="notif-list"></div>
+</div>
+
 </body>
 </html>

@@ -144,6 +144,13 @@ def init_db():
             jti TEXT UNIQUE NOT NULL,
             revoked_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            message TEXT NOT NULL,
+            is_read INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
     """)
     conn.commit()
     # Начальные пользователи
@@ -437,6 +444,7 @@ def list_work_orders():
         f"SELECT id, equipment_id, description, status, created_at"
         f" FROM work_orders {where} ORDER BY created_at DESC LIMIT ?"
     )
+
     params.append(MAX_ROWS)
     rows = db.execute(query, params).fetchall()
     return jsonify([dict(r) for r in rows])
@@ -561,12 +569,19 @@ def assign_work_order(order_id):
         (engineer_id, order_id)
     )
     db.commit()
+
+    db.execute(
+        "INSERT INTO notifications (user_id, message) VALUES (?,?)",
+        (engineer_id, f"Вам назначена заявка #{order_id}: {order['description'][:50]}")
+    )
+    db.commit()
+
     audit("ASSIGN_WORK_ORDER", "work_order", order_id,
           f"assigned_to={engineer_id}", user_id=g.current_user["id"])
     logger.info("Work order %d assigned to %s by %s",
                 order_id, engineer["username"], g.current_user["username"])
     return jsonify({"assigned": True, "engineer": engineer["username"]})
-
+    
 
 @app.route("/report/csv", methods=["GET"])
 @require_auth
@@ -735,6 +750,65 @@ def delete_user(user_id):
           f"username={user['username']}", user_id=g.current_user["id"])
     logger.info("User deleted: %s by %s", user["username"], g.current_user["username"])
     return jsonify({"message": f"User {user['username']} deleted"})
+
+@app.route("/users/change-password", methods=["POST"])
+@require_auth
+def change_password():
+    data = request.get_json(silent=True) or {}
+    old_password = str(data.get("old_password", ""))
+    new_password = str(data.get("new_password", ""))
+
+    if not old_password or not new_password:
+        return jsonify({"error": "Both passwords required"}), 400
+    if len(new_password) > MAX_PASSWORD_LEN:
+        return jsonify({"error": "Password too long"}), 400
+    if len(new_password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters"}), 400
+    if not any(c.isupper() for c in new_password):
+        return jsonify({"error": "Password must contain at least one uppercase letter"}), 400
+    if not any(c.isdigit() for c in new_password):
+        return jsonify({"error": "Password must contain at least one digit"}), 400
+
+    db = get_db()
+    user = db.execute(
+        "SELECT id, password_hash FROM users WHERE id=?",
+        (g.current_user["id"],)
+    ).fetchone()
+
+    if not bcrypt.checkpw(old_password.encode(), user["password_hash"].encode()):
+        return jsonify({"error": "Invalid current password"}), 401
+
+    new_hash = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+    db.execute(
+        "UPDATE users SET password_hash=? WHERE id=?",
+        (new_hash, g.current_user["id"])
+    )
+    db.commit()
+    audit("CHANGE_PASSWORD", user_id=g.current_user["id"])
+    logger.info("Password changed: %s", g.current_user["username"])
+    return jsonify({"message": "Password changed successfully"})
+
+@app.route("/notifications", methods=["GET"])
+@require_auth
+def get_notifications():
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, message, is_read, created_at FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 20",
+        (g.current_user["id"],)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/notifications/<int:notif_id>/read", methods=["POST"])
+@require_auth
+def mark_read(notif_id):
+    db = get_db()
+    db.execute(
+        "UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?",
+        (notif_id, g.current_user["id"])
+    )
+    db.commit()
+    return jsonify({"ok": True})
 
 if __name__ == "__main__":
     init_db()
