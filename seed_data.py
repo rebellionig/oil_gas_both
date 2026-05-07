@@ -3,6 +3,11 @@ import bcrypt
 import os
 from dotenv import load_dotenv
 
+import sys
+sys.path.insert(0, 'app')
+from main import init_db
+init_db()
+
 load_dotenv()
 DB_PATH = os.environ.get("DB_PATH", "oil_gas.db")
 

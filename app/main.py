@@ -824,10 +824,11 @@ if __name__ == "__main__":
            ssl_ctx = (str(cert), str(key))
            break
 
+    port = int(os.environ.get("PORT", 5000))
     if ssl_ctx:
-       app.run(debug=debug_mode, host="0.0.0.0", port=5000, ssl_context=ssl_ctx)
+       app.run(debug=debug_mode, host="0.0.0.0", port=port, ssl_context=ssl_ctx)
     else:
-       app.run(debug=debug_mode, host="0.0.0.0", port=5000)
+       app.run(debug=debug_mode, host="0.0.0.0", port=port)
 
 # CWE-89 from 326-329, 380, 406, 411, fixed using execute("?",(v,)) - parameterized queries
 # CWE-916 from 167-169, 679, 781 fixed by using bcrypt.hashpw(..., bcrypt.gensalt())
