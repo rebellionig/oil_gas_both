@@ -814,21 +814,25 @@ def mark_read(notif_id):
 if __name__ == "__main__":
     init_db()
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    cert_paths = [
-    (pathlib.Path("localhost+1.pem"), pathlib.Path("localhost+1-key.pem")),
-    (pathlib.Path("certs/cert.pem"), pathlib.Path("certs/key.pem")),
-    ]
-    ssl_ctx = None
-    for cert, key in cert_paths:
-       if cert.exists() and key.exists():
-           ssl_ctx = (str(cert), str(key))
-           break
-
     port = int(os.environ.get("PORT", 5000))
-    if ssl_ctx:
-       app.run(debug=debug_mode, host="0.0.0.0", port=port, ssl_context=ssl_ctx)
+    
+    # На Railway (PORT задан) — без SSL, Railway сам даёт HTTPS
+    if os.environ.get("PORT"):
+        app.run(debug=debug_mode, host="0.0.0.0", port=port)
     else:
-       app.run(debug=debug_mode, host="0.0.0.0", port=port)
+        cert_paths = [
+            (pathlib.Path("localhost+1.pem"), pathlib.Path("localhost+1-key.pem")),
+            (pathlib.Path("certs/cert.pem"), pathlib.Path("certs/key.pem")),
+        ]
+        ssl_ctx = None
+        for cert, key in cert_paths:
+            if cert.exists() and key.exists():
+                ssl_ctx = (str(cert), str(key))
+                break
+        if ssl_ctx:
+            app.run(debug=debug_mode, host="0.0.0.0", port=port, ssl_context=ssl_ctx)
+        else:
+            app.run(debug=debug_mode, host="0.0.0.0", port=port)
 
 # CWE-89 from 326-329, 380, 406, 411, fixed using execute("?",(v,)) - parameterized queries
 # CWE-916 from 167-169, 679, 781 fixed by using bcrypt.hashpw(..., bcrypt.gensalt())
