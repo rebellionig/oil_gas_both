@@ -395,7 +395,9 @@ async function doLogin() {
 }
 
 function onLoggedIn() {
-  document.getElementById('view-login').style.display = 'none';
+  const loginView = document.getElementById('view-login');
+  loginView.style.display = 'none';
+  loginView.classList.remove('active');
   document.getElementById('user-badge').style.display = 'inline';
   document.getElementById('user-badge').innerHTML = `<span>${currentUser}</span> · <span style="color:var(--text2)">${userRole}</span>`;
   document.getElementById('logout-btn').style.display = 'inline';
@@ -430,7 +432,10 @@ async function doLogout() {
 }
 
 function hideAllViews() {
-  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.style.display = ''; });
+  document.querySelectorAll('.view').forEach(v => {
+  v.classList.remove('active');
+  v.style.display = v.id === 'view-login' ? 'none' : '';
+  });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 }
 function showView(name) {
