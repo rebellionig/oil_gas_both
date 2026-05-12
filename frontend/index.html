@@ -7,428 +7,100 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #0a0c0f;
-    --bg2:       #0f1318;
-    --bg3:       #151b22;
-    --panel:     #1a2230;
-    --border:    #1e2d3d;
-    --accent:    #f5a623;
-    --accent2:   #e8891a;
-    --green:     #2ecc71;
-    --red:       #e74c3c;
-    --blue:      #3498db;
-    --text:      #c8d8e8;
-    --text2:     #7a8fa3;
-    --text3:     #3d5166;
-    --mono:      'Share Tech Mono', monospace;
-    --sans:      'Barlow', sans-serif;
-    --cond:      'Barlow Condensed', sans-serif;
+    --bg:#0a0c0f;--bg2:#0f1318;--panel:#1a2230;--border:#1e2d3d;
+    --accent:#f5a623;--accent2:#e8891a;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;
+    --text:#c8d8e8;--text2:#7a8fa3;--text3:#3d5166;
+    --mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 14px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 2px,
-      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
-  }
-
-  /* ── HEADER ── */
-  header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-
-  .logo {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .logo-icon {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 14px; color: #000; font-weight: bold;
-  }
-  .logo-text {
-    font-family: var(--cond);
-    font-size: 18px; font-weight: 700;
-    letter-spacing: 2px;
-    color: #fff;
-  }
-  .logo-sub {
-    font-family: var(--mono);
-    font-size: 10px; color: var(--accent);
-    letter-spacing: 1px;
-  }
-
-  .header-right {
-    display: flex; align-items: center; gap: 16px;
-  }
-
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--text3);
-    box-shadow: none;
-    transition: all .3s;
-  }
-  .status-dot.online {
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 8px var(--green); }
-    50%      { box-shadow: 0 0 16px var(--green), 0 0 24px var(--green); }
-  }
-
-  #user-badge {
-    font-family: var(--mono); font-size: 12px;
-    color: var(--text2); display: none;
-  }
-  #user-badge span { color: var(--accent); }
-
-  #logout-btn {
-    display: none;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2); padding: 5px 12px;
-    font-family: var(--mono); font-size: 11px;
-    cursor: pointer; letter-spacing: 1px;
-    transition: all .2s;
-  }
-  #logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* ── LAYOUT ── */
-  .layout {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    min-height: calc(100vh - 56px);
-  }
-
-  /* ── SIDEBAR ── */
-  nav {
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    padding: 16px 0;
-  }
-
-  .nav-section {
-    padding: 8px 16px 4px;
-    font-family: var(--mono); font-size: 10px;
-    color: var(--text3); letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 20px;
-    cursor: pointer; color: var(--text2);
-    font-size: 13px; font-weight: 500;
-    border-left: 2px solid transparent;
-    transition: all .15s;
-    user-select: none;
-  }
-  .nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
-  .nav-item.active {
-    color: var(--accent);
-    border-left-color: var(--accent);
-    background: rgba(245,166,35,.06);
-  }
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-
-  /* ── MAIN ── */
-  main { background: var(--bg); overflow-y: auto; }
-
-  .view { display: none; padding: 28px 32px; animation: fadeIn .2s; }
-  .view.active { display: block; }
-  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
-
-  /* ── LOGIN ── */
-  #view-login {
-    display: flex; align-items: center; justify-content: center;
-    min-height: calc(100vh - 56px);
-    background: radial-gradient(ellipse at 30% 50%, rgba(245,166,35,.04) 0%, transparent 60%);
-  }
-
-  .login-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    padding: 40px;
-    width: 360px;
-    position: relative;
-  }
-  .login-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  }
-
-  .login-title {
-    font-family: var(--cond); font-size: 22px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .login-sub {
-    font-family: var(--mono); font-size: 11px; color: var(--text3);
-    margin-bottom: 32px; letter-spacing: 1px;
-  }
-
-  /* ── FORM ELEMENTS ── */
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-family: var(--mono); font-size: 10px;
-    color: var(--text3); letter-spacing: 2px;
-    text-transform: uppercase; margin-bottom: 6px;
-  }
-  .field input, .field select, .field textarea {
-    width: 100%;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 12px;
-    font-family: var(--mono); font-size: 13px;
-    outline: none;
-    transition: border-color .2s;
-    resize: vertical;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-  }
-  .field select option { background: var(--bg2); }
-
-  /* ── BUTTONS ── */
-  .btn {
-    padding: 9px 20px;
-    font-family: var(--cond); font-size: 13px;
-    font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; cursor: pointer;
-    border: none; transition: all .15s;
-  }
-  .btn-primary {
-    background: var(--accent); color: #000;
-    width: 100%;
-  }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-sm {
-    padding: 5px 12px; font-size: 11px;
-  }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-  }
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-danger {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-  }
-  .btn-danger:hover { border-color: var(--red); color: var(--red); }
-
-  /* ── PAGE HEADER ── */
-  .page-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .page-title {
-    font-family: var(--cond); font-size: 24px;
-    font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .page-sub {
-    font-family: var(--mono); font-size: 11px;
-    color: var(--text3); margin-top: 3px;
-  }
-
-  /* ── TABLE ── */
-  .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead tr {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-  }
-  th {
-    padding: 10px 14px; text-align: left;
-    font-family: var(--mono); font-size: 10px;
-    color: var(--text3); letter-spacing: 2px;
-    text-transform: uppercase; font-weight: 400;
-  }
-  td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,.04); }
-  tr:hover td { background: rgba(255,255,255,.02); }
-  tr:last-child td { border-bottom: none; }
-
-  /* ── BADGES ── */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    font-family: var(--mono); font-size: 10px;
-    letter-spacing: 1px; text-transform: uppercase;
-    border: 1px solid; border-radius: 0;
-  }
-  .badge-open     { color: #7aa2c8; border-color: #7aa2c8; background: rgba(122,162,200,.08); }
-  .badge-progress { color: var(--accent); border-color: var(--accent); background: rgba(245,166,35,.08); }
-  .badge-hold     { color: #9b59b6; border-color: #9b59b6; background: rgba(155,89,182,.08); }
-  .badge-closed   { color: var(--green); border-color: var(--green); background: rgba(46,204,113,.08); }
-  .badge-active   { color: var(--green); border-color: var(--green); background: rgba(46,204,113,.08); }
-  .badge-inactive { color: var(--text3); border-color: var(--text3); }
-  .badge-admin    { color: var(--red); border-color: var(--red); background: rgba(231,76,60,.08); }
-  .badge-engineer { color: var(--accent); border-color: var(--accent); background: rgba(245,166,35,.08); }
-  .badge-operator { color: var(--blue); border-color: var(--blue); background: rgba(52,152,219,.08); }
-
-  /* ── PANEL / CARD ── */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-  .panel-head {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--cond); font-size: 13px;
-    font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--text2);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .panel-body { padding: 16px; }
-
-  /* ── STATS ROW ── */
-  .stats {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 16px; margin-bottom: 24px;
-  }
-  .stat {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    padding: 16px 20px;
-    position: relative; overflow: hidden;
-  }
-  .stat::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-    background: var(--accent); transform: scaleX(0);
-    transition: transform .3s; transform-origin: left;
-  }
-  .stat:hover::after { transform: scaleX(1); }
-  .stat-label {
-    font-family: var(--mono); font-size: 10px;
-    color: var(--text3); letter-spacing: 2px;
-    text-transform: uppercase; margin-bottom: 8px;
-  }
-  .stat-value {
-    font-family: var(--cond); font-size: 32px;
-    font-weight: 700; color: var(--accent);
-    line-height: 1;
-  }
-
-  /* ── ALERT ── */
-  .alert {
-    padding: 10px 14px;
-    font-family: var(--mono); font-size: 12px;
-    margin-bottom: 16px; border-left: 2px solid;
-    display: none;
-  }
-  .alert.show { display: block; }
-  .alert-error   { border-color: var(--red);   color: var(--red);   background: rgba(231,76,60,.08); }
-  .alert-success { border-color: var(--green); color: var(--green); background: rgba(46,204,113,.08); }
-  .alert-info    { border-color: var(--blue);  color: var(--blue);  background: rgba(52,152,219,.08); }
-
-  /* ── EMPTY STATE ── */
-  .empty {
-    text-align: center; padding: 48px 20px;
-    color: var(--text3); font-family: var(--mono);
-    font-size: 12px; letter-spacing: 1px;
-  }
-  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .3; }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.7); z-index: 200;
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    width: 420px; max-width: 95vw;
-    position: relative;
-  }
-  .modal::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  }
-  .modal-head {
-    padding: 16px 20px;
-    font-family: var(--cond); font-size: 15px;
-    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .modal-close {
-    background: none; border: none; color: var(--text3);
-    font-size: 18px; cursor: pointer; line-height: 1;
-  }
-  .modal-close:hover { color: var(--red); }
-  .modal-body { padding: 20px; }
-  .modal-foot {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    display: flex; gap: 8px; justify-content: flex-end;
-  }
-
-  /* ── LOG CONSOLE ── */
-  .console {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    font-family: var(--mono); font-size: 11px;
-    padding: 12px; max-height: 180px;
-    overflow-y: auto; margin-top: 16px;
-  }
-  .log-line { padding: 2px 0; }
-  .log-line.req  { color: var(--blue); }
-  .log-line.res  { color: var(--green); }
-  .log-line.err  { color: var(--red); }
-  .log-line.info { color: var(--text3); }
-
-  /* responsive */
-  @media (max-width: 700px) {
-    .layout { grid-template-columns: 1fr; }
-    nav { display: none; }
-    .stats { grid-template-columns: repeat(2,1fr); }
-  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo-icon{width:32px;height:32px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:#000;font-weight:bold}
+  .logo-text{font-family:var(--cond);font-size:18px;font-weight:700;letter-spacing:2px;color:#fff}
+  .logo-sub{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px}
+  .header-right{display:flex;align-items:center;gap:16px}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:all .3s}
+  .status-dot.online{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px var(--green)}50%{box-shadow:0 0 16px var(--green)}}
+  #user-badge{font-family:var(--mono);font-size:12px;color:var(--text2);display:none}
+  #user-badge span{color:var(--accent)}
+  #logout-btn{display:none;background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s}
+  #logout-btn:hover{border-color:var(--red);color:var(--red)}
+  .layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+  nav{background:var(--bg2);border-right:1px solid var(--border);padding:16px 0}
+  .nav-section{padding:8px 16px 4px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:all .15s;user-select:none}
+  .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(245,166,35,.06)}
+  .nav-item .icon{font-size:16px;width:20px;text-align:center}
+  main{background:var(--bg);overflow-y:auto}
+  .view{display:none;padding:28px 32px;animation:fadeIn .2s}
+  .view.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  #view-login{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 56px)}
+  .login-card{background:var(--panel);border:1px solid var(--border);padding:40px;width:360px;position:relative}
+  .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .login-title{font-family:var(--cond);font-size:22px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px}
+  .login-sub{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:32px;letter-spacing:1px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s;resize:vertical}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+  .field select option{background:var(--bg2)}
+  .btn{padding:9px 20px;font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+  .btn-primary{background:var(--accent);color:#000;width:100%}
+  .btn-primary:hover{background:var(--accent2)}
+  .btn-sm{padding:5px 12px;font-size:11px}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:transparent;border:1px solid var(--border);color:var(--text2)}
+  .btn-danger:hover{border-color:var(--red);color:var(--red)}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .page-title{font-family:var(--cond);font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .page-sub{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:3px}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead tr{background:var(--bg2);border-bottom:1px solid var(--border)}
+  th{padding:10px 14px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:400}
+  td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 8px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;border:1px solid;border-radius:0}
+  .badge-open{color:#7aa2c8;border-color:#7aa2c8;background:rgba(122,162,200,.08)}
+  .badge-progress{color:var(--accent);border-color:var(--accent);background:rgba(245,166,35,.08)}
+  .badge-hold{color:#9b59b6;border-color:#9b59b6;background:rgba(155,89,182,.08)}
+  .badge-closed{color:var(--green);border-color:var(--green);background:rgba(46,204,113,.08)}
+  .badge-active{color:var(--green);border-color:var(--green);background:rgba(46,204,113,.08)}
+  .badge-admin{color:var(--red);border-color:var(--red);background:rgba(231,76,60,.08)}
+  .badge-engineer{color:var(--accent);border-color:var(--accent);background:rgba(245,166,35,.08)}
+  .badge-operator{color:var(--blue);border-color:var(--blue);background:rgba(52,152,219,.08)}
+  .panel{background:var(--panel);border:1px solid var(--border);margin-bottom:20px}
+  .panel-head{padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;justify-content:space-between}
+  .panel-body{padding:16px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat{background:var(--panel);border:1px solid var(--border);padding:16px 20px}
+  .stat-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+  .stat-value{font-family:var(--cond);font-size:32px;font-weight:700;color:var(--accent);line-height:1}
+  .alert{padding:10px 14px;font-family:var(--mono);font-size:12px;margin-bottom:16px;border-left:2px solid;display:none}
+  .alert.show{display:block}
+  .alert-error{border-color:var(--red);color:var(--red);background:rgba(231,76,60,.08)}
+  .alert-success{border-color:var(--green);color:var(--green);background:rgba(46,204,113,.08)}
+  .alert-info{border-color:var(--blue);color:var(--blue);background:rgba(52,152,219,.08)}
+  .empty{text-align:center;padding:48px 20px;color:var(--text3);font-family:var(--mono);font-size:12px}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--border);width:420px;max-width:95vw;position:relative}
+  .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .modal-head{padding:16px 20px;font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .modal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer}
+  .modal-close:hover{color:var(--red)}
+  .modal-body{padding:20px}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+  @media(max-width:700px){.layout{grid-template-columns:1fr}nav{display:none}.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-icon">⬡</div>
@@ -441,68 +113,45 @@
     <div class="status-dot" id="status-dot"></div>
     <span id="user-badge"></span>
     <button id="notif-btn" onclick="toggleNotifications()" style="display:none;background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;font-family:var(--mono);font-size:11px;cursor:pointer;position:relative;">
-      🔔 <span id="notif-count" style="display:none;background:var(--red);color:#fff;border-radius:50%;padding:1px 5px;font-size:10px;position:absolute;top:-4px;right:-4px;">0</span>
+      🔔 <span id="notif-count" style="display:none;background:var(--red);color:#fff;border-radius:50%;padding:1px 5px;font-size:10px;position:absolute;top:-4px;right:-4px;"></span>
     </button>
-    <button id="logout-btn" onclick="logout()">ВЫХОД</button>
+    <button id="logout-btn" onclick="doLogout()">ВЫХОД</button>
   </div>
 </header>
 
 <div class="layout">
-  <nav id="sidebar">
+  <nav>
     <div class="nav-section">Навигация</div>
-    <div class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
-      <span class="icon">◈</span> Дашборд
-    </div>
-    <div class="nav-item" onclick="showView('equipment')" id="nav-equipment">
-      <span class="icon">⚙</span> Оборудование
-    </div>
-    <div class="nav-item" onclick="showView('workorders')" id="nav-workorders">
-      <span class="icon">📋</span> Заявки на ТО
-    </div>
-    <div class="nav-item" onclick="showView('report')" id="nav-report">
-      <span class="icon">📊</span> Отчёт
-    </div>
-    <div class="nav-item" onclick="showView('users')" id="nav-users">
-      <span class="icon">👤</span> Пользователи
-    </div>
-    <div class="nav-item" onclick="openModal('modal-change-password')" id="nav-password">
-      <span class="icon">🔑</span> Сменить пароль
-    </div>
-    <div class="nav-section" style="margin-top:16px">Безопасность</div>
-    <div class="nav-item" onclick="showView('security')" id="nav-security">
-      <span class="icon">🔐</span> Демо уязвимостей
-    </div>
+    <div class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard"><span class="icon">◈</span> Дашборд</div>
+    <div class="nav-item" onclick="showView('equipment')" id="nav-equipment"><span class="icon">⚙</span> Оборудование</div>
+    <div class="nav-item" onclick="showView('workorders')" id="nav-workorders"><span class="icon">📋</span> Заявки на ТО</div>
+    <div class="nav-item" onclick="showView('report')" id="nav-report"><span class="icon">📊</span> Отчёт</div>
+    <div class="nav-item" onclick="showView('users')" id="nav-users"><span class="icon">👤</span> Пользователи</div>
+    <div class="nav-item" onclick="openModal('modal-change-password')" id="nav-password"><span class="icon">🔑</span> Сменить пароль</div>
   </nav>
 
   <main>
-    <!-- LOGIN -->
     <div class="view active" id="view-login" style="display:flex">
       <div class="login-card">
         <div class="login-title">Авторизация</div>
-        <div class="login-sub">OIL & GAS MAINTENANCE SYSTEM v2.0</div>
+        <div class="login-sub">OIL &amp; GAS MMS v2.0</div>
         <div id="login-alert" class="alert alert-error"></div>
-        <div class="field">
-          <label>Логин</label>
-          <input id="login-user" type="text" value="Логин" autocomplete="off">
-        </div>
-        <div class="field">
-          <label>Пароль</label>
-          <input id="login-pass" type="password" value="Пароль">
-        </div>
+        <div class="field"><label>Логин</label><input id="login-user" type="text" placeholder="admin" autocomplete="off"></div>
+        <div class="field"><label>Пароль</label><input id="login-pass" type="password" placeholder="••••••••"></div>
+        <div class="field" id="totp-field" style="display:none"><label>TOTP код</label><input id="login-totp" type="text" placeholder="123456" maxlength="6"></div>
         <button class="btn btn-primary" onclick="doLogin()">ВОЙТИ В СИСТЕМУ</button>
+        <div style="margin-top:16px;font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;line-height:1.8">
+          admin / admin123<br>engineer1 / engineer1<br>operator1 / operator1
+        </div>
       </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="view" id="view-dashboard">
       <div class="page-header">
-        <div>
-          <div class="page-title">Дашборд</div>
-          <div class="page-sub" id="dash-time">— SYSTEM OVERVIEW —</div>
-        </div>
+        <div><div class="page-title">Дашборд</div><div class="page-sub" id="dash-time">— SYSTEM OVERVIEW —</div></div>
         <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ ОБНОВИТЬ</button>
       </div>
-      <div class="stats" id="stats-row">
+      <div class="stats">
         <div class="stat"><div class="stat-label">Оборудование</div><div class="stat-value" id="s-equip">—</div></div>
         <div class="stat"><div class="stat-label">Всего заявок</div><div class="stat-value" id="s-total">—</div></div>
         <div class="stat"><div class="stat-label">В работе</div><div class="stat-value" id="s-active">—</div></div>
@@ -511,226 +160,85 @@
       <div class="panel">
         <div class="panel-head">Последние заявки</div>
         <div class="table-wrap">
-          <table id="dash-table">
-            <thead><tr><th>#</th><th>Оборудование</th><th>Описание</th><th>Статус</th><th>Создано</th></tr></thead>
-            <tbody id="dash-tbody"></tbody>
-          </table>
+          <table><thead><tr><th>#</th><th>Оборудование</th><th>Описание</th><th>Статус</th><th>Создано</th></tr></thead>
+          <tbody id="dash-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- EQUIPMENT -->
     <div class="view" id="view-equipment">
       <div class="page-header">
-        <div>
-          <div class="page-title">Оборудование</div>
-          <div class="page-sub">REGISTERED ASSETS</div>
-        </div>
+        <div><div class="page-title">Оборудование</div><div class="page-sub">REGISTERED ASSETS</div></div>
         <button class="btn btn-outline btn-sm" id="btn-add-eq" onclick="openModal('modal-add-eq')">+ ДОБАВИТЬ</button>
       </div>
       <div class="panel">
         <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Название</th><th>Локация</th><th>Статус</th></tr></thead>
-            <tbody id="eq-tbody"></tbody>
-          </table>
+          <table><thead><tr><th>ID</th><th>Название</th><th>Локация</th><th>Статус</th></tr></thead>
+          <tbody id="eq-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- WORK ORDERS -->
     <div class="view" id="view-workorders">
       <div class="page-header">
-        <div>
-          <div class="page-title">Заявки на ТО</div>
-          <div class="page-sub">WORK ORDERS</div>
+        <div><div class="page-title">Заявки на ТО</div><div class="page-sub">WORK ORDERS</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="filter-status" onchange="loadWorkOrders()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;">
+            <option value="">Все статусы</option>
+            <option value="open">open</option>
+            <option value="in_progress">in_progress</option>
+            <option value="on_hold">on_hold</option>
+            <option value="closed">closed</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="btn-add-wo" onclick="openModal('modal-add-wo')">+ СОЗДАТЬ</button>
         </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select id="filter-status" onchange="loadWorkOrders()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;">
-          <option value="">Все статусы</option>
-          <option value="open">open</option>
-          <option value="in_progress">in_progress</option>
-          <option value="on_hold">on_hold</option>
-          <option value="closed">closed</option>
-        </select>
-        <button class="btn btn-outline btn-sm" id="btn-add-wo" onclick="openModal('modal-add-wo')">+ СОЗДАТЬ</button>
       </div>
-    </div>
-    
       <div class="panel">
         <div class="table-wrap">
-          <table>
-            <thead><tr><th>#</th><th>Оборудование ID</th><th>Описание</th><th>Статус</th><th>Создано</th><th>Действия</th></tr></thead>
-            <tbody id="wo-tbody"></tbody>
-          </table>  
+          <table><thead><tr><th>#</th><th>Обор. ID</th><th>Описание</th><th>Статус</th><th>Создано</th><th>Действия</th></tr></thead>
+          <tbody id="wo-tbody"></tbody></table>
         </div>
-        <div id="wo-pagination" style="display:flex;justify-content:center;gap:8px;padding:16px;border-top:1px solid var(--border);"></div>
+        <div id="wo-pagination" style="display:flex;justify-content:center;gap:8px;padding:16px;border-top:1px solid var(--border);flex-wrap:wrap;"></div>
       </div>
     </div>
 
-    <!-- REPORT -->
     <div class="view" id="view-report">
       <div class="page-header">
-        <div>
-          <div class="page-title">Отчёт</div>
-          <div class="page-sub">EXPORT — ADMIN / ENGINEER ONLY</div>
+        <div><div class="page-title">Отчёт</div><div class="page-sub">EXPORT — ADMIN / ENGINEER ONLY</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="loadReport()">↻ ЗАГРУЗИТЬ</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadCSV()">⬇ CSV</button>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="loadReport()">↻ ЗАГРУЗИТЬ</button>
       </div>
       <div id="report-alert" class="alert"></div>
       <div class="panel">
         <div class="table-wrap">
-          <table>
-            <thead><tr><th>#</th><th>Оборудование</th><th>Описание</th><th>Статус</th><th>Создал</th><th>Дата</th></tr></thead>
-            <tbody id="report-tbody"></tbody>
-          </table>
+          <table><thead><tr><th>#</th><th>Оборудование</th><th>Описание</th><th>Статус</th><th>Создал</th><th>Дата</th></tr></thead>
+          <tbody id="report-tbody"></tbody></table>
         </div>
       </div>
     </div>
 
-    <!-- USERS -->
-  <div class="view" id="view-users">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Пользователи</div>
-        <div class="page-sub">USER MANAGEMENT — ADMIN ONLY</div>
-      </div>
-      <button class="btn btn-outline btn-sm" id="btn-add-user" onclick="openModal('modal-add-user')">+ ДОБАВИТЬ</button>
-    </div>
-    <div id="users-alert" class="alert"></div>
-    <div class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Логин</th><th>Роль</th><th>Действия</th></tr></thead>
-          <tbody id="users-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-    </div>
-
-    <!-- SECURITY DEMO -->
-    <div class="view" id="view-security">
+    <div class="view" id="view-users">
       <div class="page-header">
-        <div>
-          <div class="page-title">Демо уязвимостей</div>
-          <div class="page-sub">VULNERABILITY DEMONSTRATION — F12 NETWORK TAB</div>
-        </div>
+        <div><div class="page-title">Пользователи</div><div class="page-sub">USER MANAGEMENT — ADMIN ONLY</div></div>
+        <button class="btn btn-outline btn-sm" onclick="openModal('modal-add-user')">+ ДОБАВИТЬ</button>
       </div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:20px;padding:10px 14px;border:1px solid var(--border);border-left:2px solid var(--accent)">
-        ⚠ Открой F12 → Network чтобы видеть все запросы и ответы в реальном времени
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-
-        <!-- CWE-306 -->
-        <div class="panel">
-          <div class="panel-head">CWE-306 — Нет аутентификации <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              GET /equipment без токена на порту 5000 (vulnerable)
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE306()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-306-out" class="console" style="display:none"></div>
-          </div>
+      <div id="users-alert" class="alert"></div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table><thead><tr><th>ID</th><th>Логин</th><th>Роль</th><th>Действия</th></tr></thead>
+          <tbody id="users-tbody"></tbody></table>
         </div>
-
-        <!-- CWE-306 fixed -->
-        <div class="panel">
-          <div class="panel-head">CWE-306 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              GET /equipment без токена на порту 5001 (secure) → 401
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE306Fixed()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-306f-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-89 -->
-        <div class="panel">
-          <div class="panel-head">CWE-89 — SQL Injection <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              Логин с payload <code style="color:var(--accent)">admin' --</code> обходит пароль
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE89()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-89-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-89 fixed -->
-        <div class="panel">
-          <div class="panel-head">CWE-89 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              Тот же payload на secure → 401 Invalid credentials
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE89Fixed()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-89f-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-285 -->
-        <div class="panel">
-          <div class="panel-head">CWE-285 — Нет авторизации <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              operator1 получает полный отчёт на порту 5000
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE285()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-285-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-285 fixed -->
-        <div class="panel">
-          <div class="panel-head">CWE-285 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              operator1 пытается получить отчёт на порту 5001 → 403
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE285Fixed()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-285f-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-613 logout -->
-        <div class="panel">
-          <div class="panel-head">CWE-613 — Инвалидация JWT <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              Токен остаётся активным после logout (нет revoked_tokens)
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE613()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-613-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
-        <!-- CWE-613 fixed -->
-        <div class="panel">
-          <div class="panel-head">CWE-613 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
-          <div class="panel-body">
-            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-              После logout токен инвалидируется → 401 при повторном использовании
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="demoCWE613Fixed()">▶ ЗАПУСТИТЬ</button>
-            <div id="demo-613f-out" class="console" style="display:none"></div>
-          </div>
-        </div>
-
       </div>
     </div>
-
   </main>
 </div>
 
-<!-- MODAL: добавить оборудование -->
+<!-- MODALS -->
 <div class="modal-overlay" id="modal-add-eq">
   <div class="modal">
-    <div class="modal-head">
-      Добавить оборудование
-      <button class="modal-close" onclick="closeModal('modal-add-eq')">✕</button>
-    </div>
+    <div class="modal-head">Добавить оборудование <button class="modal-close" onclick="closeModal('modal-add-eq')">✕</button></div>
     <div class="modal-body">
       <div id="eq-modal-alert" class="alert"></div>
       <div class="field"><label>Название</label><input id="eq-name" placeholder="Pump-04"></div>
@@ -743,23 +251,13 @@
   </div>
 </div>
 
-<!-- MODAL: создать заявку -->
 <div class="modal-overlay" id="modal-add-wo">
   <div class="modal">
-    <div class="modal-head">
-      Создать заявку на ТО
-      <button class="modal-close" onclick="closeModal('modal-add-wo')">✕</button>
-    </div>
+    <div class="modal-head">Создать заявку <button class="modal-close" onclick="closeModal('modal-add-wo')">✕</button></div>
     <div class="modal-body">
       <div id="wo-modal-alert" class="alert"></div>
-      <div class="field">
-        <label>Оборудование</label>
-        <select id="wo-eq"></select>
-      </div>
-      <div class="field">
-        <label>Описание работ</label>
-        <textarea id="wo-desc" rows="3" placeholder="Плановое ТО насоса..."></textarea>
-      </div>
+      <div class="field"><label>Оборудование</label><select id="wo-eq"></select></div>
+      <div class="field"><label>Описание</label><textarea id="wo-desc" rows="3" placeholder="Плановое ТО..."></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal('modal-add-wo')">Отмена</button>
@@ -768,19 +266,14 @@
   </div>
 </div>
 
-<!-- MODAL: добавить пользователя -->
 <div class="modal-overlay" id="modal-add-user">
   <div class="modal">
-    <div class="modal-head">
-      Добавить пользователя
-      <button class="modal-close" onclick="closeModal('modal-add-user')">✕</button>
-    </div>
+    <div class="modal-head">Добавить пользователя <button class="modal-close" onclick="closeModal('modal-add-user')">✕</button></div>
     <div class="modal-body">
       <div id="user-modal-alert" class="alert"></div>
       <div class="field"><label>Логин</label><input id="new-username" placeholder="engineer3"></div>
-      <div class="field"><label>Пароль</label><input id="new-password" type="password" placeholder="минимум 8 символов"></div>
-      <div class="field">
-        <label>Роль</label>
+      <div class="field"><label>Пароль</label><input id="new-password-user" type="password" placeholder="мин. 8 симв., заглавная + цифра"></div>
+      <div class="field"><label>Роль</label>
         <select id="new-role">
           <option value="engineer">engineer</option>
           <option value="operator">operator</option>
@@ -795,18 +288,14 @@
   </div>
 </div>
 
-<!-- MODAL: смена пароля -->
 <div class="modal-overlay" id="modal-change-password">
   <div class="modal">
-    <div class="modal-head">
-      Сменить пароль
-      <button class="modal-close" onclick="closeModal('modal-change-password')">✕</button>
-    </div>
+    <div class="modal-head">Сменить пароль <button class="modal-close" onclick="closeModal('modal-change-password')">✕</button></div>
     <div class="modal-body">
       <div id="pwd-modal-alert" class="alert"></div>
       <div class="field"><label>Текущий пароль</label><input id="old-password" type="password"></div>
-      <div class="field"><label>Новый пароль</label><input id="new-password" type="password"></div>
-      <div class="field"><label>Повторите новый пароль</label><input id="confirm-password" type="password"></div>
+      <div class="field"><label>Новый пароль</label><input id="new-password-change" type="password"></div>
+      <div class="field"><label>Повторите пароль</label><input id="confirm-password" type="password"></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal('modal-change-password')">Отмена</button>
@@ -815,19 +304,12 @@
   </div>
 </div>
 
-<!-- MODAL: назначить инженера -->
 <div class="modal-overlay" id="modal-assign">
   <div class="modal">
-    <div class="modal-head">
-      Назначить инженера
-      <button class="modal-close" onclick="closeModal('modal-assign')">✕</button>
-    </div>
+    <div class="modal-head">Назначить инженера <button class="modal-close" onclick="closeModal('modal-assign')">✕</button></div>
     <div class="modal-body">
       <div id="assign-modal-alert" class="alert"></div>
-      <div class="field">
-        <label>Инженер</label>
-        <select id="assign-engineer"></select>
-      </div>
+      <div class="field"><label>Инженер</label><select id="assign-engineer"></select></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal('modal-assign')">Отмена</button>
@@ -836,22 +318,15 @@
   </div>
 </div>
 
-<!-- MODAL: изменить статус -->
 <div class="modal-overlay" id="modal-status">
   <div class="modal">
-    <div class="modal-head">
-      Изменить статус
-      <button class="modal-close" onclick="closeModal('modal-status')">✕</button>
-    </div>
+    <div class="modal-head">Изменить статус <button class="modal-close" onclick="closeModal('modal-status')">✕</button></div>
     <div class="modal-body">
       <div id="status-modal-alert" class="alert"></div>
-      <div class="field">
-        <label>Новый статус</label>
+      <div class="field"><label>Новый статус</label>
         <select id="new-status">
-          <option value="open">open</option>
-          <option value="in_progress">in_progress</option>
-          <option value="on_hold">on_hold</option>
-          <option value="closed">closed</option>
+          <option value="open">open</option><option value="in_progress">in_progress</option>
+          <option value="on_hold">on_hold</option><option value="closed">closed</option>
         </select>
       </div>
     </div>
@@ -862,126 +337,123 @@
   </div>
 </div>
 
+<div id="notif-panel" style="display:none;position:fixed;top:60px;right:16px;width:320px;background:var(--panel);border:1px solid var(--border);z-index:300;max-height:400px;overflow-y:auto;">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:2px;color:var(--text2);display:flex;justify-content:space-between;align-items:center;">
+    Уведомления
+    <button onclick="markAllRead()" style="background:none;border:none;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;">ПРОЧИТАТЬ ВСЕ</button>
+  </div>
+  <div id="notif-list"></div>
+</div>
+
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const API_SECURE = 'https://127.0.0.1:5000';
-const API_VULN   = 'http://127.0.0.1:5003';
+// ── KEY FIX FOR RAILWAY ───────────────────────────────────────────────────────
+// window.location.origin автоматически подставляет правильный URL:
+//   локально:  http://127.0.0.1:5000
+//   Railway:   https://oilgasboth-production.up.railway.app
+const API = window.location.origin;
 
-let token    = null;
-let userRole = null;
-let username = null;
-let selectedOrderId = null;
-let woCurrentPage = 1;
+let token = null, userRole = null, currentUser = null;
+let selectedOrderId = null, woCurrentPage = 1;
 const WO_PER_PAGE = 20;
+let notifInterval = null;
 
-// ── API HELPER ───────────────────────────────────────────────────────────────
 async function api(method, url, body, useToken = true) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (useToken && token) opts.headers['Authorization'] = `Bearer ${token}`;
   if (body) opts.body = JSON.stringify(body);
-  const resp = await fetch(url, opts);
-  const data = await resp.json().catch(() => ({}));
-  return { ok: resp.ok, status: resp.status, data };
+  try {
+    const resp = await fetch(url, opts);
+    const data = await resp.json().catch(() => ({}));
+    return { ok: resp.ok, status: resp.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: e.message } };
+  }
 }
 
-// ── AUTH ─────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const user = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value;
-  const alert = document.getElementById('login-alert');
-  alert.className = 'alert'; alert.style.display = 'none';
+  const totpCode = document.getElementById('login-totp').value.trim();
+  const al = document.getElementById('login-alert');
+  al.className = 'alert alert-error'; al.style.display = 'none';
 
-  const { ok, status, data } = await api('POST', `${API_SECURE}/login`, { username: user, password: pass }, false);
+  const payload = { username: user, password: pass };
+  if (totpCode) payload.totp_code = totpCode;
 
+  const { ok, status, data } = await api('POST', `${API}/login`, payload, false);
   if (ok) {
-    token    = data.token;
-    userRole = data.role;
-    username = user;
+    token = data.token; userRole = data.role; currentUser = user;
     onLoggedIn();
+  } else if (data.totp_required) {
+    document.getElementById('totp-field').style.display = 'block';
+    al.textContent = 'Введите TOTP код из Google Authenticator';
+    al.className = 'alert alert-info show';
   } else {
-    alert.textContent = `[${status}] ${data.error || 'Ошибка входа'}`;
-    alert.className = 'alert alert-error show';
+    al.textContent = `[${status}] ${data.error || 'Ошибка входа'}`;
+    al.className = 'alert alert-error show';
   }
 }
 
 function onLoggedIn() {
   document.getElementById('view-login').style.display = 'none';
   document.getElementById('user-badge').style.display = 'inline';
-  document.getElementById('user-badge').innerHTML =
-    `<span>${username}</span> · <span style="color:var(--text2)">${userRole}</span>`;
+  document.getElementById('user-badge').innerHTML = `<span>${currentUser}</span> · <span style="color:var(--text2)">${userRole}</span>`;
   document.getElementById('logout-btn').style.display = 'inline';
   document.getElementById('status-dot').classList.add('online');
   document.getElementById('notif-btn').style.display = 'inline';
-  loadNotifications();
-  setInterval(loadNotifications, 30000);
-
-  // скрыть кнопки недоступные для роли
   if (userRole === 'operator') {
     document.getElementById('btn-add-eq').style.display = 'none';
     document.getElementById('btn-add-wo').style.display = 'none';
   }
-
+  if (userRole !== 'admin' && userRole !== 'engineer') document.getElementById('nav-report').style.display = 'none';
+  if (userRole !== 'admin') document.getElementById('nav-users').style.display = 'none';
+  notifInterval = setInterval(loadNotifications, 30000);
+  loadNotifications();
   showView('dashboard');
   loadDashboard();
 }
 
-function logout() {
-  token = null; userRole = null; username = null;
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('user-badge').style.display = 'none';
-  document.getElementById('logout-btn').style.display = 'none';
+async function doLogout() {
+  if (token) await api('POST', `${API}/logout`, {});
+  token = null; userRole = null; currentUser = null;
+  if (notifInterval) clearInterval(notifInterval);
+  ['login-user','login-pass','login-totp'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('totp-field').style.display = 'none';
+  ['user-badge','logout-btn'].forEach(id => document.getElementById(id).style.display = 'none');
   document.getElementById('status-dot').classList.remove('online');
   document.getElementById('notif-btn').style.display = 'none';
   document.getElementById('notif-panel').style.display = 'none';
   document.getElementById('notif-count').style.display = 'none';
-  document.getElementById('view-login').style.display = 'flex';
+  ['nav-report','nav-users','btn-add-eq','btn-add-wo'].forEach(id => document.getElementById(id).style.display = '');
   hideAllViews();
+  document.getElementById('view-login').style.display = 'flex';
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
 function hideAllViews() {
-  document.querySelectorAll('.view').forEach(v => {
-    if (v.id !== 'view-login') { v.classList.remove('active'); v.style.display = ''; }
-  });
+  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.style.display = ''; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 }
-
 function showView(name) {
   if (!token && name !== 'login') return;
   hideAllViews();
   document.getElementById(`view-${name}`).classList.add('active');
   const nav = document.getElementById(`nav-${name}`);
   if (nav) nav.classList.add('active');
-
   if (name === 'equipment')  loadEquipment();
   if (name === 'workorders') loadWorkOrders();
   if (name === 'report')     loadReport();
   if (name === 'users')      loadUsers();
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function loadDashboard() {
-  const [eqR, woR] = await Promise.all([
-    api('GET', `${API_SECURE}/equipment`),
-    api('GET', `${API_SECURE}/work-orders`)
-  ]);
-  const eq = eqR.ok ? eqR.data : [];
-  const wo = woR.ok ? woR.data : [];
-
+  const [eqR, woR] = await Promise.all([api('GET', `${API}/equipment`), api('GET', `${API}/work-orders`)]);
+  const eq = eqR.ok ? eqR.data : [], wo = woR.ok ? woR.data : [];
   document.getElementById('s-equip').textContent  = eq.length;
   document.getElementById('s-total').textContent  = wo.length;
   document.getElementById('s-active').textContent = wo.filter(w => w.status === 'in_progress').length;
   document.getElementById('s-closed').textContent = wo.filter(w => w.status === 'closed').length;
   document.getElementById('dash-time').textContent = new Date().toLocaleString('ru');
-
-  // map equipment id → name
-  const eqMap = {};
-  eq.forEach(e => eqMap[e.id] = e.name);
-
+  const eqMap = {}; eq.forEach(e => eqMap[e.id] = e.name);
   const tbody = document.getElementById('dash-tbody');
   const recent = [...wo].sort((a,b) => b.id - a.id).slice(0, 6);
   tbody.innerHTML = recent.length ? recent.map(w => `
@@ -989,295 +461,112 @@ async function loadDashboard() {
       <td style="font-family:var(--mono);color:var(--text3)">#${w.id}</td>
       <td>${eqMap[w.equipment_id] || w.equipment_id}</td>
       <td style="color:var(--text2)">${w.description}</td>
-      <td>${badgeStatus(w.status)}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.created_at?.slice(0,16) || '—'}</td>
-    </tr>`).join('') :
-    `<tr><td colspan="5"><div class="empty"><div class="empty-icon">◈</div>Заявок нет</div></td></tr>`;
+      <td>${badge(w.status)}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(w.created_at||'').slice(0,16)}</td>
+    </tr>`).join('') : `<tr><td colspan="5"><div class="empty">Заявок нет</div></td></tr>`;
 }
 
-// ── EQUIPMENT ─────────────────────────────────────────────────────────────────
 async function loadEquipment() {
-  const { ok, data } = await api('GET', `${API_SECURE}/equipment`);
-  const tbody = document.getElementById('eq-tbody');
-  if (!ok) { tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);font-family:var(--mono)">${data.error||'Ошибка'}</td></tr>`; return; }
-  tbody.innerHTML = data.length ? data.map(e => `
+  const { ok, data } = await api('GET', `${API}/equipment`);
+  document.getElementById('eq-tbody').innerHTML = ok && data.length ? data.map(e => `
     <tr>
       <td style="font-family:var(--mono);color:var(--text3)">${e.id}</td>
       <td style="font-weight:500">${e.name}</td>
       <td style="color:var(--text2)">${e.location}</td>
       <td><span class="badge badge-${e.status}">${e.status}</span></td>
-    </tr>`).join('') :
-    `<tr><td colspan="4"><div class="empty"><div class="empty-icon">⚙</div>Оборудование не найдено</div></td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="4"><div class="empty">Нет оборудования</div></td></tr>`;
 }
 
 async function addEquipment() {
   const name = document.getElementById('eq-name').value.trim();
   const loc  = document.getElementById('eq-loc').value.trim();
   const al   = document.getElementById('eq-modal-alert');
-  al.className = 'alert';
-
-  const { ok, status, data } = await api('POST', `${API_SECURE}/equipment`, { name, location: loc });
-  if (ok) {
-    closeModal('modal-add-eq');
-    loadEquipment();
-    document.getElementById('eq-name').value = '';
-    document.getElementById('eq-loc').value  = '';
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className   = 'alert alert-error show';
-  }
+  const { ok, status, data } = await api('POST', `${API}/equipment`, { name, location: loc });
+  if (ok) { closeModal('modal-add-eq'); loadEquipment(); document.getElementById('eq-name').value=''; document.getElementById('eq-loc').value=''; }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
-// ── WORK ORDERS ───────────────────────────────────────────────────────────────
 async function loadWorkOrders() {
-  const filterStatus = document.getElementById('filter-status')?.value || '';
-  const url = filterStatus ? `${API_SECURE}/work-orders?status=${filterStatus}` : `${API_SECURE}/work-orders`;
+  const fs  = document.getElementById('filter-status')?.value || '';
+  const url = fs ? `${API}/work-orders?status=${fs}` : `${API}/work-orders`;
   const { ok, data } = await api('GET', url);
-  if (!ok) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red)">${data.error||'Ошибка'}</td></tr>`; return; }
-
-  const totalPages = Math.ceil(data.length / WO_PER_PAGE);
-  if (woCurrentPage > totalPages) woCurrentPage = 1;
-  const start = (woCurrentPage - 1) * WO_PER_PAGE;
-  const pageData = data.slice(start, start + WO_PER_PAGE);
-
   const tbody = document.getElementById('wo-tbody');
-  
+  if (!ok) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--red)">${data.error||'Ошибка'}</td></tr>`; return; }
+  const totalPages = Math.max(1, Math.ceil(data.length / WO_PER_PAGE));
+  if (woCurrentPage > totalPages) woCurrentPage = 1;
+  const pageData = data.slice((woCurrentPage-1)*WO_PER_PAGE, woCurrentPage*WO_PER_PAGE);
   tbody.innerHTML = pageData.length ? pageData.map(w => `
     <tr>
       <td style="font-family:var(--mono);color:var(--text3)">#${w.id}</td>
       <td style="font-family:var(--mono)">${w.equipment_id}</td>
       <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.description}</td>
-      <td>${badgeStatus(w.status)}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.created_at?.slice(0,16)||'—'}</td>
-      <td>${w.status !== 'closed' && userRole !== 'operator' ? `
+      <td>${badge(w.status)}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(w.created_at||'').slice(0,16)}</td>
+      <td>${w.status!=='closed' && userRole!=='operator' ? `
         <button class="btn btn-outline btn-sm" onclick="openStatusModal(${w.id})" style="margin-right:4px">Статус</button>
-        ${userRole === 'admin' ? `<button class="btn btn-outline btn-sm" onclick="openAssignModal(${w.id})" style="margin-right:4px">Назначить</button>` : ''}
+        ${userRole==='admin' ? `<button class="btn btn-outline btn-sm" onclick="openAssignModal(${w.id})" style="margin-right:4px">Назначить</button>` : ''}
         <button class="btn btn-danger btn-sm" onclick="closeOrder(${w.id})">Закрыть</button>
       ` : '<span style="color:var(--text3);font-size:11px;font-family:var(--mono)">—</span>'}</td>
-    </tr>`).join('') :
-    `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div>Заявок нет</div></td></tr>`;
-    
-    const pagination = document.getElementById('wo-pagination');
-    if (totalPages > 1) {
-      pagination.innerHTML = Array.from({length: totalPages}, (_, i) => `
-        <button onclick="woCurrentPage=${i+1};loadWorkOrders()" class="btn btn-sm ${woCurrentPage===i+1?'btn-primary':'btn-outline'}">${i+1}</button>
-      `).join('');
-    } else {
-      pagination.innerHTML = '';
-    }
-
+    </tr>`).join('') : `<tr><td colspan="6"><div class="empty">Заявок нет</div></td></tr>`;
+  document.getElementById('wo-pagination').innerHTML = totalPages > 1 ?
+    Array.from({length:totalPages},(_,i)=>`<button onclick="woCurrentPage=${i+1};loadWorkOrders()" class="btn btn-sm ${woCurrentPage===i+1?'btn-primary':'btn-outline'}">${i+1}</button>`).join('') : '';
 }
 
 async function createWorkOrder() {
   const eqId = document.getElementById('wo-eq').value;
   const desc = document.getElementById('wo-desc').value.trim();
   const al   = document.getElementById('wo-modal-alert');
-  al.className = 'alert';
-
-  const { ok, status, data } = await api('POST', `${API_SECURE}/work-orders`,
-    { equipment_id: parseInt(eqId), description: desc });
-  if (ok) {
-    closeModal('modal-add-wo');
-    loadWorkOrders();
-    document.getElementById('wo-desc').value = '';
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className   = 'alert alert-error show';
-  }
+  const { ok, status, data } = await api('POST', `${API}/work-orders`, { equipment_id: parseInt(eqId), description: desc });
+  if (ok) { closeModal('modal-add-wo'); loadWorkOrders(); document.getElementById('wo-desc').value=''; }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
-async function openStatusModal(orderId) {
-  selectedOrderId = orderId;
-  document.getElementById('status-modal-alert').className = 'alert';
-  openModal('modal-status');
-}
+function openStatusModal(id) { selectedOrderId=id; document.getElementById('status-modal-alert').className='alert'; openModal('modal-status'); }
 
 async function doUpdateStatus() {
   const st = document.getElementById('new-status').value;
   const al = document.getElementById('status-modal-alert');
-  const { ok, status, data } = await api('PATCH',
-    `${API_SECURE}/work-orders/${selectedOrderId}/status`, { status: st });
+  const { ok, status, data } = await api('PATCH', `${API}/work-orders/${selectedOrderId}/status`, { status: st });
   if (ok) { closeModal('modal-status'); loadWorkOrders(); }
-  else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className   = 'alert alert-error show';
-  }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
 async function closeOrder(orderId) {
-  const { ok, status, data } = await api('POST',
-    `${API_SECURE}/work-orders/${orderId}/close`, {});
-  if (ok) loadWorkOrders();
-  else alert(`[${status}] ${data.error || 'Ошибка'}`);
+  const { ok, status, data } = await api('POST', `${API}/work-orders/${orderId}/close`, {});
+  if (ok) loadWorkOrders(); else alert(`[${status}] ${data.error||'Ошибка'}`);
 }
 
-// ── REPORT ────────────────────────────────────────────────────────────────────
 async function loadReport() {
-  const al = document.getElementById('report-alert');
-  al.className = 'alert';
-  const { ok, status, data } = await api('GET', `${API_SECURE}/report`);
+  const al = document.getElementById('report-alert'); al.className = 'alert';
+  const { ok, status, data } = await api('GET', `${API}/report`);
   const tbody = document.getElementById('report-tbody');
   if (ok) {
     tbody.innerHTML = data.length ? data.map(r => `
       <tr>
         <td style="font-family:var(--mono);color:var(--text3)">#${r.id}</td>
-        <td style="font-weight:500">${r.equipment_name}</td>
+        <td>${r.equipment_name}</td>
         <td style="color:var(--text2)">${r.description}</td>
-        <td>${badgeStatus(r.status)}</td>
+        <td>${badge(r.status)}</td>
         <td style="font-family:var(--mono);font-size:11px">${r.created_by}</td>
-        <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${r.created_at?.slice(0,16)||'—'}</td>
-      </tr>`).join('') :
-      `<tr><td colspan="6"><div class="empty">Нет данных</div></td></tr>`;
+        <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(r.created_at||'').slice(0,16)}</td>
+      </tr>`).join('') : `<tr><td colspan="6"><div class="empty">Нет данных</div></td></tr>`;
   } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'} — ${status===403?'Недостаточно прав (CWE-285 исправлен)':''}`;
-    al.className   = `alert ${status===403?'alert-info':'alert-error'} show`;
-    tbody.innerHTML = '';
+    al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className=`alert ${status===403?'alert-info':'alert-error'} show`; tbody.innerHTML='';
   }
 }
 
-// ── SECURITY DEMOS ────────────────────────────────────────────────────────────
-function logTo(elId, lines) {
-  const el = document.getElementById(elId);
-  el.style.display = 'block';
-  el.innerHTML = lines.map(([cls, txt]) =>
-    `<div class="log-line ${cls}">${txt}</div>`).join('');
+async function downloadCSV() {
+  const resp = await fetch(`${API}/report/csv`, { headers: { 'Authorization': `Bearer ${token}` } });
+  if (!resp.ok) { alert('Нет доступа к CSV'); return; }
+  const blob = await resp.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='report.csv'; a.click();
+  URL.revokeObjectURL(url);
 }
 
-async function demoCWE306() {
-  logTo('demo-306-out', [['info', '→ GET http://127.0.0.1:5000/equipment (без токена)']]);
-  try {
-    const r = await fetch(`${API_VULN}/equipment`);
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-306-out', [
-      ['req',  '→ GET /equipment  [no Authorization header]'],
-      ['res',  `← HTTP ${r.status}  [УЯЗВИМО: данные без аутентификации]`],
-      ['res',  `← ${JSON.stringify(d).slice(0,120)}...`],
-    ]);
-  } catch(e) {
-    logTo('demo-306-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-async function demoCWE306Fixed() {
-  try {
-    const r = await fetch(`${API_SECURE}/equipment`);
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-306f-out', [
-      ['req',  '→ GET /equipment  [no Authorization header]'],
-      ['res',  `← HTTP ${r.status}  ${r.status===401?'[ЗАЩИТА: 401 Authentication required]':'[unexpected]'}`],
-      ['res',  `← ${JSON.stringify(d)}`],
-    ]);
-  } catch(e) {
-    logTo('demo-306f-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-async function demoCWE89() {
-  const payload = {"username": "admin' --", "password": "anything"};
-  logTo('demo-89-out', [['info', `→ POST /login  payload: ${JSON.stringify(payload)}`]]);
-  try {
-    const r = await fetch(`${API_VULN}/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-89-out', [
-      ['req',  `→ POST /login  username="admin' --"  password="anything"`],
-      ['res',  `← HTTP ${r.status}  ${r.status===200?'[УЯЗВИМО: токен без пароля!]':'[защита]'}`],
-      ['res',  d.role ? `← role: ${d.role}  token: ${d.token?.slice(0,40)}...` : `← ${JSON.stringify(d)}`],
-    ]);
-  } catch(e) {
-    logTo('demo-89-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-async function demoCWE89Fixed() {
-  const payload = {"username": "admin' --", "password": "anything"};
-  try {
-    const r = await fetch(`${API_SECURE}/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-89f-out', [
-      ['req',  `→ POST /login  username="admin' --"  password="anything"`],
-      ['res',  `← HTTP ${r.status}  ${r.status===401?'[ЗАЩИТА: 401 Invalid credentials]':'[unexpected]'}`],
-      ['res',  `← ${JSON.stringify(d)}`],
-    ]);
-  } catch(e) {
-    logTo('demo-89f-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-async function demoCWE285() {
-  try {
-    const loginR = await fetch(`${API_VULN}/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username:'operator1', password:'operator1'})
-    });
-    const loginD = await loginR.json();
-    const opToken = loginD.token;
-    const r = await fetch(`${API_VULN}/report`, {
-      headers: { 'Authorization': opToken }
-    });
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-285-out', [
-      ['req',  '→ POST /login  operator1/operator1'],
-      ['res',  `← token получен`],
-      ['req',  '→ GET /report  [operator token]'],
-      ['res',  `← HTTP ${r.status}  ${r.status===200?'[УЯЗВИМО: operator видит отчёт!]':'[защита]'}`],
-      ['res',  `← ${JSON.stringify(d).slice(0,120)}`],
-    ]);
-  } catch(e) {
-    logTo('demo-285-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-async function demoCWE285Fixed() {
-  try {
-    const loginR = await fetch(`${API_SECURE}/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username:'operator1', password:'operator1'})
-    });
-    const loginD = await loginR.json();
-    const opToken = loginD.token;
-    const r = await fetch(`${API_SECURE}/report`, {
-      headers: { 'Authorization': `Bearer ${opToken}` }
-    });
-    const d = await r.json().catch(() => ({}));
-    logTo('demo-285f-out', [
-      ['req',  '→ POST /login  operator1/operator1'],
-      ['res',  `← token получен`],
-      ['req',  '→ GET /report  [operator Bearer token]'],
-      ['res',  `← HTTP ${r.status}  ${r.status===403?'[ЗАЩИТА: 403 Forbidden]':'[unexpected]'}`],
-      ['res',  `← ${JSON.stringify(d)}`],
-    ]);
-  } catch(e) {
-    logTo('demo-285f-out', [['err', `Сервер недоступен: ${e.message}`]]);
-  }
-}
-
-// ── MODALS ────────────────────────────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById(id).classList.add('show');
-  // заполнить select оборудования
-  if (id === 'modal-add-wo') {
-    api('GET', `${API_SECURE}/equipment`).then(({ok, data}) => {
-      const sel = document.getElementById('wo-eq');
-      if (ok) sel.innerHTML = data.map(e =>
-        `<option value="${e.id}">${e.name} (${e.location})</option>`).join('');
-    });
-  }
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-
-// ── USERS ─────────────────────────────────────────────────────────────────────
 async function loadUsers() {
-  const al = document.getElementById('users-alert');
-  al.className = 'alert';
-  const { ok, status, data } = await api('GET', `${API_SECURE}/admin/users`);
+  const al = document.getElementById('users-alert'); al.className = 'alert';
+  const { ok, status, data } = await api('GET', `${API}/admin/users`);
   const tbody = document.getElementById('users-tbody');
   if (ok) {
     tbody.innerHTML = data.length ? data.map(u => `
@@ -1285,222 +574,86 @@ async function loadUsers() {
         <td style="font-family:var(--mono);color:var(--text3)">${u.id}</td>
         <td style="font-weight:500">${u.username}</td>
         <td><span class="badge badge-${u.role}">${u.role}</span></td>
-        <td>${u.username !== username ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${u.username}')">Удалить</button>` : '<span style="color:var(--text3);font-size:11px;font-family:var(--mono)">—</span>'}</td>
-      </tr>`).join('') :
-      `<tr><td colspan="3"><div class="empty">Нет пользователей</div></td></tr>`;
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Нет доступа — только admin'}`;
-    al.className = `alert alert-error show`;
-    tbody.innerHTML = '';
-  }
+        <td>${u.username!==currentUser ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${u.username}')">Удалить</button>` : '<span style="color:var(--text3);font-family:var(--mono);font-size:11px">—</span>'}</td>
+      </tr>`).join('') : `<tr><td colspan="4"><div class="empty">Нет пользователей</div></td></tr>`;
+  } else { al.textContent=`[${status}] ${data.error||'Нет доступа'}`; al.className='alert alert-error show'; tbody.innerHTML=''; }
 }
 
 async function addUser() {
-  const username = document.getElementById('new-username').value.trim();
-  const password = document.getElementById('new-password').value;
-  const role     = document.getElementById('new-role').value;
-  const al       = document.getElementById('user-modal-alert');
-  al.className   = 'alert';
-
-  const { ok, status, data } = await api('POST', `${API_SECURE}/admin/users`,
-    { username, password, role });
-  if (ok) {
-    closeModal('modal-add-user');
-    loadUsers();
-    document.getElementById('new-username').value = '';
-    document.getElementById('new-password').value = '';
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className   = 'alert alert-error show';
-  }
+  const uname = document.getElementById('new-username').value.trim();
+  const pwd   = document.getElementById('new-password-user').value;
+  const role  = document.getElementById('new-role').value;
+  const al    = document.getElementById('user-modal-alert');
+  const { ok, status, data } = await api('POST', `${API}/admin/users`, { username: uname, password: pwd, role });
+  if (ok) { closeModal('modal-add-user'); loadUsers(); document.getElementById('new-username').value=''; document.getElementById('new-password-user').value=''; }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
 async function deleteUser(userId, userName) {
-  if (!confirm(`Удалить пользователя ${userName}?`)) return;
-  const { ok, status, data } = await api('DELETE', `${API_SECURE}/admin/users/${userId}`);
-  if (ok) {
-    loadUsers();
-  } else {
-    alert(`[${status}] ${data.error || 'Ошибка'}`);
-  }
+  if (!confirm(`Удалить ${userName}?`)) return;
+  const { ok, status, data } = await api('DELETE', `${API}/admin/users/${userId}`);
+  if (ok) loadUsers(); else alert(`[${status}] ${data.error||'Ошибка'}`);
 }
 
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
   document.getElementById('assign-modal-alert').className = 'alert';
-  const { ok, data } = await api('GET', `${API_SECURE}/admin/users`);
-  if (ok) {
-    const engineers = data.filter(u => u.role === 'engineer');
-    document.getElementById('assign-engineer').innerHTML = engineers.map(u =>
-      `<option value="${u.id}">${u.username}</option>`).join('');
-  }
+  const { ok, data } = await api('GET', `${API}/admin/users`);
+  if (ok) document.getElementById('assign-engineer').innerHTML = data.filter(u=>u.role==='engineer').map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
   openModal('modal-assign');
 }
 
 async function doAssign() {
-  const engineerId = document.getElementById('assign-engineer').value;
+  const engId = document.getElementById('assign-engineer').value;
   const al = document.getElementById('assign-modal-alert');
-  const { ok, status, data } = await api('POST',
-    `${API_SECURE}/work-orders/${selectedOrderId}/assign`,
-    { engineer_id: parseInt(engineerId) });
-  if (ok) {
-    closeModal('modal-assign');
-    loadWorkOrders();
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className = 'alert alert-error show';
-  }
+  const { ok, status, data } = await api('POST', `${API}/work-orders/${selectedOrderId}/assign`, { engineer_id: parseInt(engId) });
+  if (ok) { closeModal('modal-assign'); loadWorkOrders(); }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
 async function doChangePassword() {
-  const oldPwd = document.getElementById('old-password').value;
-  const newPwd = document.getElementById('new-password').value;
-  const confirmPwd = document.getElementById('confirm-password').value;
-  const al = document.getElementById('pwd-modal-alert');
-  al.className = 'alert';
-
-  if (newPwd !== confirmPwd) {
-    al.textContent = 'Новые пароли не совпадают';
-    al.className = 'alert alert-error show';
-    return;
-  }
-
-  const { ok, status, data } = await api('POST',
-    `${API_SECURE}/users/change-password`,
-    { old_password: oldPwd, new_password: newPwd });
-
-  if (ok) {
-    closeModal('modal-change-password');
-    document.getElementById('old-password').value = '';
-    document.getElementById('new-password').value = '';
-    document.getElementById('confirm-password').value = '';
-    alert('Пароль успешно изменён');
-  } else {
-    al.textContent = `[${status}] ${data.error || 'Ошибка'}`;
-    al.className = 'alert alert-error show';
-  }
+  const oldPwd  = document.getElementById('old-password').value;
+  const newPwd  = document.getElementById('new-password-change').value;
+  const confirm = document.getElementById('confirm-password').value;
+  const al = document.getElementById('pwd-modal-alert'); al.className = 'alert';
+  if (newPwd !== confirm) { al.textContent='Пароли не совпадают'; al.className='alert alert-error show'; return; }
+  const { ok, status, data } = await api('POST', `${API}/users/change-password`, { old_password: oldPwd, new_password: newPwd });
+  if (ok) { closeModal('modal-change-password'); ['old-password','new-password-change','confirm-password'].forEach(id=>document.getElementById(id).value=''); alert('Пароль изменён'); }
+  else { al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className='alert alert-error show'; }
 }
 
-// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
 async function loadNotifications() {
-  const { ok, data } = await api('GET', `${API_SECURE}/notifications`);
+  const { ok, data } = await api('GET', `${API}/notifications`);
   if (!ok) return;
   const unread = data.filter(n => !n.is_read).length;
-  const countEl = document.getElementById('notif-count');
-  if (unread > 0) {
-    countEl.textContent = unread;
-    countEl.style.display = 'inline';
-  } else {
-    countEl.style.display = 'none';
-  }
-  const list = document.getElementById('notif-list');
-  list.innerHTML = data.length ? data.map(n => `
-    <div onclick="readNotif(${n.id}, this)" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read ? 'transparent' : 'rgba(245,166,35,0.05)'}">
-      <div style="font-size:12px;color:${n.is_read ? 'var(--text2)' : 'var(--text)'}">${n.message}</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">${n.created_at?.slice(0,16)||''}</div>
-    </div>`).join('') :
-    '<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)">Нет уведомлений</div>';
+  const cnt = document.getElementById('notif-count');
+  cnt.textContent = unread; cnt.style.display = unread > 0 ? 'inline' : 'none';
+  document.getElementById('notif-list').innerHTML = data.length ? data.map(n => `
+    <div onclick="readNotif(${n.id},this)" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read?'transparent':'rgba(245,166,35,.05)'}">
+      <div style="font-size:12px;color:${n.is_read?'var(--text2)':'var(--text)'}">${n.message}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">${(n.created_at||'').slice(0,16)}</div>
+    </div>`).join('') : '<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)">Нет уведомлений</div>';
 }
-
-function toggleNotifications() {
-  const panel = document.getElementById('notif-panel');
-  if (panel.style.display === 'none') {
-    panel.style.display = 'block';
-    loadNotifications();
-  } else {
-    panel.style.display = 'none';
-  }
-}
-
-async function readNotif(id, el) {
-  await api('POST', `${API_SECURE}/notifications/${id}/read`, {});
-  el.style.background = 'transparent';
-  loadNotifications();
-}
-
+function toggleNotifications() { const p=document.getElementById('notif-panel'); p.style.display=p.style.display==='none'?'block':'none'; if(p.style.display==='block')loadNotifications(); }
+async function readNotif(id,el) { await api('POST',`${API}/notifications/${id}/read`,{}); el.style.background='transparent'; loadNotifications(); }
 async function markAllRead() {
-  const { ok, data } = await api('GET', `${API_SECURE}/notifications`);
-  if (ok) {
-    await Promise.all(data.filter(n => !n.is_read).map(n =>
-      api('POST', `${API_SECURE}/notifications/${n.id}/read`, {})));
-    loadNotifications();
-  }
+  const {ok,data}=await api('GET',`${API}/notifications`);
+  if(ok) { await Promise.all(data.filter(n=>!n.is_read).map(n=>api('POST',`${API}/notifications/${n.id}/read`,{}))); loadNotifications(); }
 }
 
-async function demoCWE613() {
-  const out = document.getElementById('demo-613-out');
-  out.style.display = 'block';
-  out.textContent = 'Логин на уязвимой версии (порт 5003)...';
-  try {
-    const r1 = await fetch('http://127.0.0.1:5003/login', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username: 'admin', password: 'admin123'})
-    });
-    const d1 = await r1.json();
-    const tok = d1.token;
-    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
-    out.textContent += '\nВыход из системы (logout)...';
-    await fetch('http://127.0.0.1:5003/logout', {
-      method: 'POST', headers: {'Authorization': `Bearer ${tok}`}
-    });
-    out.textContent += '\n✓ Logout выполнен';
-    out.textContent += '\nИспользуем старый токен после logout...';
-    const r2 = await fetch('http://127.0.0.1:5003/equipment', {
-      headers: {'Authorization': `Bearer ${tok}`}
-    });
-    const d2 = await r2.json();
-    out.textContent += `\n⚠ УЯЗВИМОСТЬ: статус ${r2.status} — ${JSON.stringify(d2).substring(0,60)}`;
-  } catch(e) {
-    out.textContent += `\nОшибка: ${e.message}`;
-  }
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+  if (id==='modal-add-wo') api('GET',`${API}/equipment`).then(({ok,data})=>{if(ok)document.getElementById('wo-eq').innerHTML=data.map(e=>`<option value="${e.id}">${e.name} (${e.location})</option>`).join('');});
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function badge(s) {
+  const m={open:'badge-open',in_progress:'badge-progress',on_hold:'badge-hold',closed:'badge-closed'};
+  return `<span class="badge ${m[s]||''}">${s}</span>`;
 }
 
-async function demoCWE613Fixed() {
-  const out = document.getElementById('demo-613f-out');
-  out.style.display = 'block';
-  out.textContent = 'Логин на защищённой версии...';
-  try {
-    const r1 = await fetch(`${API_SECURE}/login`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username: 'admin', password: 'admin123'})
-    });
-    const d1 = await r1.json();
-    const tok = d1.token;
-    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
-    out.textContent += '\nВыход из системы (logout)...';
-    await fetch(`${API_SECURE}/logout`, {
-      method: 'POST', headers: {'Authorization': `Bearer ${tok}`}
-    });
-    out.textContent += '\n✓ Logout выполнен — токен инвалидирован';
-    out.textContent += '\nИспользуем старый токен после logout...';
-    const r2 = await fetch(`${API_SECURE}/equipment`, {
-      headers: {'Authorization': `Bearer ${tok}`}
-    });
-    const d2 = await r2.json();
-    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
-  } catch(e) {
-    out.textContent += `\nОшибка: ${e.message}`;
-  }
-}
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function badgeStatus(s) {
-  const map = { open:'badge-open', in_progress:'badge-progress', on_hold:'badge-hold', closed:'badge-closed' };
-  return `<span class="badge ${map[s]||''}">${s}</span>`;
-}
-
-// Enter на форме логина
-document.getElementById('login-pass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-totp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 </script>
-<!-- NOTIFICATIONS PANEL -->
-<div id="notif-panel" style="display:none;position:fixed;top:60px;right:16px;width:320px;background:var(--panel);border:1px solid var(--border);z-index:300;max-height:400px;overflow-y:auto;">
-  <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);display:flex;justify-content:space-between;align-items:center;">
-    Уведомления
-    <button onclick="markAllRead()" style="background:none;border:none;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;letter-spacing:1px;">ПРОЧИТАТЬ ВСЕ</button>
-  </div>
-  <div id="notif-list"></div>
-</div>
-
 </body>
 </html>
