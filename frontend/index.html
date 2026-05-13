@@ -169,7 +169,10 @@
     <div class="view" id="view-equipment">
       <div class="page-header">
         <div><div class="page-title">Оборудование</div><div class="page-sub">REGISTERED ASSETS</div></div>
-        <button class="btn btn-outline btn-sm" id="btn-add-eq" onclick="openModal('modal-add-eq')">+ ДОБАВИТЬ</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="filter-eq" placeholder="Поиск по названию/локации..." oninput="loadEquipment()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;width:220px;">
+          <button class="btn btn-outline btn-sm" id="btn-add-eq" onclick="openModal('modal-add-eq')">+ ДОБАВИТЬ</button>
+        </div>
       </div>
       <div class="panel">
         <div class="table-wrap">
@@ -183,6 +186,7 @@
       <div class="page-header">
         <div><div class="page-title">Заявки на ТО</div><div class="page-sub">WORK ORDERS</div></div>
         <div style="display:flex;gap:8px;align-items:center">
+          <input id="filter-wo" placeholder="Поиск по описанию..." oninput="loadWorkOrders()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;width:200px;">
           <select id="filter-status" onchange="loadWorkOrders()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;">
             <option value="">Все статусы</option>
             <option value="open">open</option>
@@ -472,8 +476,13 @@ async function loadDashboard() {
 }
 
 async function loadEquipment() {
+  const filter = document.getElementById('filter-eq')?.value.toLowerCase() || '';
   const { ok, data } = await api('GET', `${API}/equipment`);
-  document.getElementById('eq-tbody').innerHTML = ok && data.length ? data.map(e => `
+  const filtered = ok ? data.filter(e =>
+    e.name.toLowerCase().includes(filter) ||
+    e.location.toLowerCase().includes(filter)
+  ) : [];
+  document.getElementById('eq-tbody').innerHTML = filtered.length ? filtered.map(e => `
     <tr>
       <td style="font-family:var(--mono);color:var(--text3)">${e.id}</td>
       <td style="font-weight:500">${e.name}</td>
@@ -497,9 +506,11 @@ async function loadWorkOrders() {
   const { ok, data } = await api('GET', url);
   const tbody = document.getElementById('wo-tbody');
   if (!ok) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--red)">${data.error||'Ошибка'}</td></tr>`; return; }
-  const totalPages = Math.max(1, Math.ceil(data.length / WO_PER_PAGE));
+  const filterWo = document.getElementById('filter-wo')?.value.toLowerCase() || '';
+  const filtered = data.filter(w => w.description.toLowerCase().includes(filterWo));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / WO_PER_PAGE));
   if (woCurrentPage > totalPages) woCurrentPage = 1;
-  const pageData = data.slice((woCurrentPage-1)*WO_PER_PAGE, woCurrentPage*WO_PER_PAGE);
+  const pageData = filtered.slice((woCurrentPage-1)*WO_PER_PAGE, woCurrentPage*WO_PER_PAGE);
   tbody.innerHTML = pageData.length ? pageData.map(w => `
     <tr>
       <td style="font-family:var(--mono);color:var(--text3)">#${w.id}</td>

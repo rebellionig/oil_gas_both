@@ -534,7 +534,6 @@ def export_report():
     audit("EXPORT_REPORT", user_id=g.current_user["id"])
     logger.info("Report exported by %s", g.current_user["username"])
     response = jsonify([dict(r) for r in rows])
-    response.headers["Content-Disposition"] = "attachment; filename=report.json"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
