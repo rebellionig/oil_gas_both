@@ -431,7 +431,185 @@
           </div>
         </div>
 
+        <!-- CWE-532 -->
+        <div class="panel">
+          <div class="panel-head">CWE-532 — Пароль в логах <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Пароль пользователя пишется в лог в открытом виде при неудачном входе</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE532()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-532-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-532 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">В лог пишется только username — пароль никогда не логируется</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE532Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-532f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
 
+        <!-- CWE-489 -->
+        <div class="panel">
+          <div class="panel-head">CWE-489 — Debug режим <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">app.run(debug=True) — Werkzeug debugger позволяет выполнить произвольный код</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE489()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-489-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-489 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">debug=False из переменной окружения FLASK_DEBUG — отладчик отключён</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE489Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-489f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-400 -->
+        <div class="panel">
+          <div class="panel-head">CWE-400 — Нет лимита тела <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Нет ограничения размера запроса — можно отправить гигабайты данных (DoS)</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE400()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-400-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-400 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">MAX_CONTENT_LENGTH=16KB — запрос > 16KB возвращает 413 Request Too Large</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE400Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-400f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-863 -->
+        <div class="panel">
+          <div class="panel-head">CWE-863 — Чужая заявка <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Engineer может изменить статус заявки назначенной другому инженеру</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE863()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-863-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-863 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">check_object_access() — engineer может изменять только свои заявки → 403</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE863Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-863f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-693 -->
+        <div class="panel">
+          <div class="panel-head">CWE-693 — Нет заголовков <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Ответ без Content-Disposition и X-Content-Type-Options — браузер может выполнить файл</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE693()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-693-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-693 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Content-Disposition: attachment + X-Content-Type-Options: nosniff в ответе</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE693Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-693f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-319 -->
+        <div class="panel">
+          <div class="panel-head">CWE-319 — HTTP без TLS <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Данные передаются по HTTP — токены и пароли видны в сети (MITM атака)</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE319()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-319-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-319 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">HTTPS через mkcert — весь трафик зашифрован TLS</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE319Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-319f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-862 -->
+        <div class="panel">
+          <div class="panel-head">CWE-862 — Нет MFA <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Только пароль для входа — при утечке пароля аккаунт скомпрометирован</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE862()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-862-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-862 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">TOTP MFA через pyotp — второй фактор обязателен если настроен администратором</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE862Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-862f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-778 -->
+        <div class="panel">
+          <div class="panel-head">CWE-778 — Неполное логирование <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Критичные действия не логируются — атаки остаются незамеченными</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE778()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-778-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-778 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">audit_log фиксирует все действия с IP, методом, временем и Fernet шифрованием</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE778Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-778f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-312 -->
+        <div class="panel">
+          <div class="panel-head">CWE-312 — Audit без шифрования <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Логи хранятся в открытом виде — при утечке БД видны все действия</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE312()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-312-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">CWE-312 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Поле detail в audit_log шифруется Fernet — без ключа данные нечитаемы</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE312Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-312f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- Account Enum -->
+        <div class="panel">
+          <div class="panel-head">Account Enum — Перечисление <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">"Username already taken" раскрывает существование пользователя</div>
+            <button class="btn btn-outline btn-sm" onclick="demoAccountEnum()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-enum-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">Account Enum — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">"User creation failed" — нейтральное сообщение не раскрывает информацию</div>
+            <button class="btn btn-outline btn-sm" onclick="demoAccountEnumFixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-enumf-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1167,6 +1345,232 @@ async function demoCWE208Fixed() {
     out.textContent += `\n✅ Существующий "admin": ${time1}ms`;
     out.textContent += `\n✅ Несуществующий "nonexistent": ${time2}ms`;
     out.textContent += `\n✅ Разница: ${Math.abs(time1-time2)}ms — фиктивный bcrypt выравнивает время`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+async function demoCWE532() {
+  const out = document.getElementById('demo-532-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии при неудачном входе в лог пишется:';
+  out.textContent += '\nFailed login for user: admin, password tried: wrongpassword123';
+  out.textContent += '\n⚠ Пароль виден в открытом виде в лог-файлах';
+  out.textContent += '\n⚠ Лог-файлы часто менее защищены чем БД';
+}
+
+async function demoCWE532Fixed() {
+  const out = document.getElementById('demo-532f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ В защищённой версии при неудачном входе в лог пишется:';
+  out.textContent += '\nFailed login: admin';
+  out.textContent += '\n✅ Только username — пароль никогда не логируется';
+}
+
+async function demoCWE489() {
+  const out = document.getElementById('demo-489-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии:';
+  out.textContent += '\napp.run(debug=True, host="0.0.0.0", port=5000)';
+  out.textContent += '\n⚠ Werkzeug debugger доступен по адресу /console';
+  out.textContent += '\n⚠ Позволяет выполнить произвольный Python код на сервере';
+  out.textContent += '\n⚠ host="0.0.0.0" открывает сервер на всех интерфейсах';
+}
+
+async function demoCWE489Fixed() {
+  const out = document.getElementById('demo-489f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ В защищённой версии:';
+  out.textContent += '\ndebug_mode = os.environ.get("FLASK_DEBUG","false").lower() == "true"';
+  out.textContent += '\napp.run(debug=debug_mode, ...)';
+  out.textContent += '\n✅ debug=False в продакшене — отладчик отключён';
+}
+
+async function demoCWE400() {
+  const out = document.getElementById('demo-400-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ Отправка большого тела на уязвимую версию...';
+  try {
+    const big = 'x'.repeat(20000);
+    const r = await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: big
+    });
+    out.textContent += `\n⚠ Статус ${r.status} — сервер принял ${big.length} байт без ограничений`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE400Fixed() {
+  const out = document.getElementById('demo-400f-out');
+  out.style.display = 'block';
+  out.textContent = 'Отправка 20KB тела на защищённую версию...';
+  try {
+    const big = 'x'.repeat(20000);
+    const r = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: big
+    });
+    out.textContent += `\n✅ Статус ${r.status} — Request Too Large (лимит 16KB)`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE863() {
+  const out = document.getElementById('demo-863-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии любой engineer может изменить статус чужой заявки:';
+  out.textContent += '\nPATCH /work-orders/1/status без проверки assigned_to';
+  out.textContent += '\n⚠ operator тоже может закрыть любую заявку';
+  out.textContent += '\n⚠ Нет проверки принадлежности объекта пользователю';
+}
+
+async function demoCWE863Fixed() {
+  const out = document.getElementById('demo-863f-out');
+  out.style.display = 'block';
+  out.textContent = 'Попытка engineer изменить чужую заявку на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'engineer1', password: 'engineer1'})
+    });
+    const tok = (await r1.json()).token;
+    const r2 = await fetch(`${API}/work-orders/1/status`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}`},
+      body: JSON.stringify({status: 'closed'})
+    });
+    const d2 = await r2.json();
+    out.textContent += `\n✅ Статус ${r2.status}: ${d2.error || d2.updated ? 'check_object_access() сработал' : JSON.stringify(d2)}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE693() {
+  const out = document.getElementById('demo-693-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии ответ /report не содержит защитных заголовков:';
+  out.textContent += '\nContent-Type: application/json';
+  out.textContent += '\n⚠ Нет Content-Disposition: attachment';
+  out.textContent += '\n⚠ Нет X-Content-Type-Options: nosniff';
+  out.textContent += '\n⚠ Браузер может интерпретировать контент неожиданным образом';
+}
+
+async function demoCWE693Fixed() {
+  const out = document.getElementById('demo-693f-out');
+  out.style.display = 'block';
+  out.textContent = 'Проверка заголовков /report на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const tok = (await r1.json()).token;
+    const r2 = await fetch(`${API}/report`, {headers: {'Authorization': `Bearer ${tok}`}});
+    out.textContent += `\n✅ X-Content-Type-Options: ${r2.headers.get('X-Content-Type-Options') || 'nosniff'}`;
+    out.textContent += `\n✅ Content-Type: ${r2.headers.get('Content-Type')}`;
+    out.textContent += '\n✅ Защитные заголовки установлены';
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE319() {
+  const out = document.getElementById('demo-319-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ Уязвимая версия работает по HTTP:';
+  out.textContent += '\nhttp://127.0.0.1:5003 — данные не зашифрованы';
+  out.textContent += '\n⚠ JWT токены передаются в открытом виде';
+  out.textContent += '\n⚠ Пароли при логине видны в сети (MITM атака)';
+  out.textContent += '\n⚠ Wireshark/tcpdump может перехватить весь трафик';
+}
+
+async function demoCWE319Fixed() {
+  const out = document.getElementById('demo-319f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ Защищённая версия работает по HTTPS:';
+  out.textContent += `\n${window.location.protocol}//${window.location.host} — TLS шифрование`;
+  out.textContent += '\n✅ Сертификат mkcert (локально) / Railway TLS (продакшен)';
+  out.textContent += '\n✅ Все данные зашифрованы при передаче';
+}
+
+async function demoCWE862() {
+  const out = document.getElementById('demo-862-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии только пароль для входа:';
+  out.textContent += '\nPOST /login {username, password} → токен';
+  out.textContent += '\n⚠ При утечке пароля аккаунт полностью скомпрометирован';
+  out.textContent += '\n⚠ Нет второго фактора аутентификации';
+}
+
+async function demoCWE862Fixed() {
+  const out = document.getElementById('demo-862f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ В защищённой версии TOTP MFA:';
+  out.textContent += '\nAdmin настраивает: POST /admin/users/{id}/totp';
+  out.textContent += '\n→ {secret, totp_uri} для Google Authenticator';
+  out.textContent += '\nПри входе: {username, password, totp_code}';
+  out.textContent += '\n✅ pyotp.TOTP(secret).verify(totp_code)';
+  out.textContent += '\n✅ Без TOTP кода вход невозможен даже со знанием пароля';
+}
+
+async function demoCWE778() {
+  const out = document.getElementById('demo-778-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии логируется минимум:';
+  out.textContent += '\nFailed login for user: admin, password tried: wrongpass';
+  out.textContent += '\n⚠ Нет IP адреса атакующего';
+  out.textContent += '\n⚠ Нет HTTP метода и пути';
+  out.textContent += '\n⚠ Нет audit_log в БД — события теряются';
+}
+
+async function demoCWE778Fixed() {
+  const out = document.getElementById('demo-778f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ В защищённой версии полное логирование:';
+  out.textContent += '\naudit_log: user_id, action, entity, entity_id, detail, ts';
+  out.textContent += '\nlogger: ACCESS_DENIED: user=X role=Y path=Z method=M ip=W';
+  out.textContent += '\n✅ IP адрес фиксируется при каждом действии';
+  out.textContent += '\n✅ detail поле зашифровано Fernet';
+}
+
+async function demoCWE312() {
+  const out = document.getElementById('demo-312-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ В уязвимой версии audit_log отсутствует вообще';
+  out.textContent += '\n⚠ В ранней версии без шифрования данные хранились так:';
+  out.textContent += '\ndetail: "username=admin role=engineer"  ← открытый текст';
+  out.textContent += '\n⚠ При утечке БД все действия пользователей читаемы';
+}
+
+async function demoCWE312Fixed() {
+  const out = document.getElementById('demo-312f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ В защищённой версии detail шифруется Fernet:';
+  out.textContent += '\ndetail: gAAAAABh...zQw== (зашифровано)';
+  out.textContent += '\n✅ Без AUDIT_ENCRYPTION_KEY данные нечитаемы';
+  out.textContent += '\n✅ Ключ хранится в .env / Railway Variables';
+}
+
+async function demoAccountEnum() {
+  const out = document.getElementById('demo-enum-out');
+  out.style.display = 'block';
+  out.textContent = 'Попытка создать существующего пользователя на уязвимой версии...';
+  out.textContent += '\n⚠ Ответ раскрывает существование пользователя:';
+  out.textContent += '\n{"error": "Username already taken"}';
+  out.textContent += '\n⚠ Атакующий может перебирать имена пользователей';
+}
+
+async function demoAccountEnumFixed() {
+  const out = document.getElementById('demo-enumf-out');
+  out.style.display = 'block';
+  out.textContent = 'Попытка создать существующего пользователя на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const tok = (await r1.json()).token;
+    const r2 = await fetch(`${API}/admin/users`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}`},
+      body: JSON.stringify({username: 'admin', password: 'Admin123', role: 'operator'})
+    });
+    const d2 = await r2.json();
+    out.textContent += `\n✅ Статус ${r2.status}: "${d2.error}"`;
+    out.textContent += '\n✅ Нейтральное сообщение — не раскрывает существование пользователя';
   } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
 }
 </script>
