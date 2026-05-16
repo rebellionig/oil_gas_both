@@ -391,6 +391,48 @@
           </div>
         </div>
 
+        <!-- CWE-521 -->
+        <div class="panel">
+          <div class="panel-head">CWE-521 — Слабый пароль <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Уязвимая версия принимает любой пароль — "123", "abc", "password"</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE521()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-521-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-521 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-521 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Политика пароля: мин. 8 символов, заглавная буква, цифра → 400 при нарушении</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE521Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-521f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-208 -->
+        <div class="panel">
+          <div class="panel-head">CWE-208 — Timing атака <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Разное время ответа для существующего и несуществующего пользователя — можно определить наличие аккаунта</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE208()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-208-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-208 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-208 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Фиктивный bcrypt.checkpw() для несуществующих пользователей — время ответа одинаковое</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE208Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-208f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+
+
       </div>
     </div>
   </main>
@@ -953,6 +995,7 @@ async function demoCWE613Fixed() {
     out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
   } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
 }
+
 async function demoCWE916() {
   const out = document.getElementById('demo-916-out');
   out.style.display = 'block';
@@ -1032,6 +1075,99 @@ async function demoA04Fixed() {
     } catch(e) { out.textContent += `\nОшибка: ${e.message}`; break; }
   }
   if (!blocked) out.textContent += '\n(лимит не достигнут за 12 запросов)';
+}
+
+async function demoCWE521() {
+  const out = document.getElementById('demo-521-out');
+  out.style.display = 'block';
+  out.textContent = 'Попытка создать пользователя со слабым паролем на уязвимой версии...';
+  try {
+    const r = await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const d = await r.json();
+    const tok = d.token;
+    out.textContent += `\n✓ Логин успешен`;
+    const r2 = await fetch(`${API_VULN}/equipment`, {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}`},
+      body: JSON.stringify({name: 'Test; DROP TABLE users;--', location: 'hack'})
+    });
+    out.textContent += `\n⚠ УЯЗВИМОСТЬ: нет политики паролей — любой пароль принимается`;
+    out.textContent += `\n⚠ Пример слабых паролей: "123", "abc", "password", "qwerty"`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE521Fixed() {
+  const out = document.getElementById('demo-521f-out');
+  out.style.display = 'block';
+  out.textContent = 'Попытка создать пользователя со слабым паролем на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const tok = (await r1.json()).token;
+    const passwords = ['abc', '12345678', 'password1'];
+    for (const pwd of passwords) {
+      const r = await fetch(`${API}/admin/users`, {
+        method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}`},
+        body: JSON.stringify({username: `test_${pwd}`, password: pwd, role: 'operator'})
+      });
+      const d = await r.json();
+      out.textContent += `\n✅ пароль "${pwd}" → статус ${r.status}: ${d.error || 'OK'}`;
+    }
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE208() {
+  const out = document.getElementById('demo-208-out');
+  out.style.display = 'block';
+  out.textContent = 'Замер времени ответа для существующего и несуществующего пользователя...';
+  try {
+    const t1 = Date.now();
+    await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'wrongpass'})
+    });
+    const time1 = Date.now() - t1;
+
+    const t2 = Date.now();
+    await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'nonexistent_user_xyz', password: 'wrongpass'})
+    });
+    const time2 = Date.now() - t2;
+
+    out.textContent += `\n⚠ Существующий "admin": ${time1}ms`;
+    out.textContent += `\n⚠ Несуществующий "nonexistent": ${time2}ms`;
+    out.textContent += `\n⚠ Разница: ${Math.abs(time1-time2)}ms — можно определить существование аккаунта`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE208Fixed() {
+  const out = document.getElementById('demo-208f-out');
+  out.style.display = 'block';
+  out.textContent = 'Замер времени ответа на защищённой версии...';
+  try {
+    const t1 = Date.now();
+    await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'wrongpass'})
+    });
+    const time1 = Date.now() - t1;
+
+    const t2 = Date.now();
+    await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'nonexistent_user_xyz', password: 'wrongpass'})
+    });
+    const time2 = Date.now() - t2;
+
+    out.textContent += `\n✅ Существующий "admin": ${time1}ms`;
+    out.textContent += `\n✅ Несуществующий "nonexistent": ${time2}ms`;
+    out.textContent += `\n✅ Разница: ${Math.abs(time1-time2)}ms — фиктивный bcrypt выравнивает время`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
 }
 </script>
 </body>
