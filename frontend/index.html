@@ -211,7 +211,8 @@
       <div class="page-header">
         <div><div class="page-title">Отчёт</div><div class="page-sub">EXPORT — ADMIN / ENGINEER ONLY</div></div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-outline btn-sm" onclick="loadReport()">↻ ЗАГРУЗИТЬ</button>
+          <button class="btn btn-outline btn-sm" onclick="loadReport()">↻ ОБНОВИТЬ</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadJSON()">⬇ JSON</button>
           <button class="btn btn-outline btn-sm" onclick="downloadCSV()">⬇ CSV</button>
         </div>
       </div>
@@ -1572,6 +1573,14 @@ async function demoAccountEnumFixed() {
     out.textContent += `\n✅ Статус ${r2.status}: "${d2.error}"`;
     out.textContent += '\n✅ Нейтральное сообщение — не раскрывает существование пользователя';
   } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+async function downloadJSON() {
+  const { ok, data } = await api('GET', `${API}/report`);
+  if (!ok) { alert('Нет доступа к отчёту'); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='report.json'; a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 </body>
