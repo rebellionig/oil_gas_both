@@ -207,15 +207,25 @@
       </div>
     </div>
 
-    <div class="view" id="view-report">
+    <div class="view" id="view-report"  >
       <div class="page-header">
         <div><div class="page-title">Отчёт</div><div class="page-sub">EXPORT — ADMIN / ENGINEER ONLY</div></div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="filter-report-eq" placeholder="Оборудование..." oninput="loadReport()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;width:140px;">
+          <input id="filter-report-user" placeholder="Создатель..." oninput="loadReport()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;width:130px;">
+          <select id="filter-report-status" onchange="loadReport()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:5px 10px;font-family:var(--mono);font-size:12px;">
+            <option value="">Все статусы</option>
+            <option value="open">open</option>
+            <option value="in_progress">in_progress</option>
+            <option value="on_hold">on_hold</option>
+            <option value="closed">closed</option>
+          </select>
           <button class="btn btn-outline btn-sm" onclick="loadReport()">↻ ОБНОВИТЬ</button>
           <button class="btn btn-outline btn-sm" onclick="downloadJSON()">⬇ JSON</button>
           <button class="btn btn-outline btn-sm" onclick="downloadCSV()">⬇ CSV</button>
-        </div>
       </div>
+    </div>
+        
       <div id="report-alert" class="alert"></div>
       <div class="panel">
         <div class="table-wrap" style="max-height:600px;overflow-y:auto;">
@@ -935,7 +945,16 @@ async function loadReport() {
   const { ok, status, data } = await api('GET', `${API}/report`);
   const tbody = document.getElementById('report-tbody');
   if (ok) {
-    tbody.innerHTML = data.length ? data.map(r => `
+    const filterEq   = document.getElementById('filter-report-eq')?.value.toLowerCase() || '';
+    const filterUser = document.getElementById('filter-report-user')?.value.toLowerCase() || '';
+    const filterSt   = document.getElementById('filter-report-status')?.value || '';
+    const filtered = data.filter(r =>
+      (!filterEq   || r.equipment_name.toLowerCase().includes(filterEq)) &&
+      (!filterUser || r.created_by.toLowerCase().includes(filterUser)) &&
+      (!filterSt   || r.status === filterSt)
+    );
+    tbody.innerHTML = filtered.length ? filtered.map(r => `
+
       <tr>
         <td style="font-family:var(--mono);color:var(--text3)">#${r.id}</td>
         <td>${r.equipment_name}</td>
@@ -943,6 +962,7 @@ async function loadReport() {
         <td>${badge(r.status)}</td>
         <td style="font-family:var(--mono);font-size:11px">${r.created_by}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${(r.created_at||'').slice(0,16)}</td>
+
       </tr>`).join('') : `<tr><td colspan="6"><div class="empty">Нет данных</div></td></tr>`;
   } else {
     al.textContent=`[${status}] ${data.error||'Ошибка'}`; al.className=`alert ${status===403?'alert-info':'alert-error'} show`; tbody.innerHTML='';
@@ -1574,10 +1594,19 @@ async function demoAccountEnumFixed() {
     out.textContent += '\n✅ Нейтральное сообщение — не раскрывает существование пользователя';
   } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
 }
+
 async function downloadJSON() {
   const { ok, data } = await api('GET', `${API}/report`);
   if (!ok) { alert('Нет доступа к отчёту'); return; }
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const filterEq   = document.getElementById('filter-report-eq')?.value.toLowerCase() || '';
+  const filterUser = document.getElementById('filter-report-user')?.value.toLowerCase() || '';
+  const filterSt   = document.getElementById('filter-report-status')?.value || '';
+  const filtered = data.filter(r =>
+    (!filterEq   || r.equipment_name.toLowerCase().includes(filterEq)) &&
+    (!filterUser || r.created_by.toLowerCase().includes(filterUser)) &&
+    (!filterSt   || r.status === filterSt)
+  );
+  const blob = new Blob([JSON.stringify(filtered, null, 2)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='report.json'; a.click();
   URL.revokeObjectURL(url);
