@@ -128,6 +128,7 @@
     <div class="nav-item" onclick="showView('report')" id="nav-report"><span class="icon">📊</span> Отчёт</div>
     <div class="nav-item" onclick="showView('users')" id="nav-users"><span class="icon">👤</span> Пользователи</div>
     <div class="nav-item" onclick="openModal('modal-change-password')" id="nav-password"><span class="icon">🔑</span> Сменить пароль</div>
+    <div class="nav-item" onclick="showView('security')" id="nav-security"><span class="icon">🔐</span> Демо уязвимостей</div>
   </nav>
 
   <main>
@@ -234,6 +235,103 @@
           <table><thead><tr><th>ID</th><th>Логин</th><th>Роль</th><th>Действия</th></tr></thead>
           <tbody id="users-tbody"></tbody></table>
         </div>
+      </div>
+    </div>
+
+    <!-- SECURITY DEMO -->
+    <div class="view" id="view-security">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Демо уязвимостей</div>
+          <div class="page-sub">VULNERABILITY DEMONSTRATION — F12 NETWORK TAB</div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:20px;padding:10px 14px;border:1px solid var(--border);border-left:2px solid var(--accent)">
+        ⚠ Открой F12 → Network чтобы видеть все запросы и ответы в реальном времени
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- CWE-306 -->
+        <div class="panel">
+          <div class="panel-head">CWE-306 — Нет аутентификации <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">GET /equipment без токена на уязвимой версии → данные доступны</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE306()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-306-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-306 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-306 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">GET /equipment без токена на защищённой версии → 401</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE306Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-306f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-89 -->
+        <div class="panel">
+          <div class="panel-head">CWE-89 — SQL Injection <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Логин с payload <code style="color:var(--accent)">admin' --</code> обходит пароль</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE89()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-89-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-89 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-89 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Тот же payload на защищённой версии → 401 Invalid credentials</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE89Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-89f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-285 -->
+        <div class="panel">
+          <div class="panel-head">CWE-285 — Нет авторизации <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">operator получает полный отчёт на уязвимой версии</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE285()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-285-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-285 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-285 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">operator пытается получить отчёт на защищённой версии → 403</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE285Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-285f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-613 -->
+        <div class="panel">
+          <div class="panel-head">CWE-613 — Инвалидация JWT <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Токен остаётся активным после logout на уязвимой версии</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE613()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-613-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-613 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-613 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">После logout токен инвалидируется → 401 при повторном использовании</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE613Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-613f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -670,6 +768,132 @@ function badge(s) {
 
 document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-totp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── SECURITY DEMO ─────────────────────────────────────────────────────────────
+const API_VULN = 'http://127.0.0.1:5003';
+
+async function demoCWE306() {
+  const out = document.getElementById('demo-306-out');
+  out.style.display = 'block';
+  out.textContent = 'Запрос GET /equipment без токена на уязвимой версии...';
+  try {
+    const r = await fetch(`${API_VULN}/equipment`);
+    const d = await r.json();
+    out.textContent += `\n⚠ УЯЗВИМОСТЬ: статус ${r.status} — получено ${d.length} записей без авторизации`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (уязвимый сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE306Fixed() {
+  const out = document.getElementById('demo-306f-out');
+  out.style.display = 'block';
+  out.textContent = 'Запрос GET /equipment без токена на защищённой версии...';
+  try {
+    const r = await fetch(`${API}/equipment`);
+    const d = await r.json();
+    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r.status} — ${d.error}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE89() {
+  const out = document.getElementById('demo-89-out');
+  out.style.display = 'block';
+  out.textContent = "Логин с payload: username = \"admin' --\"";
+  try {
+    const r = await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: "admin' --", password: "anything"})
+    });
+    const d = await r.json();
+    out.textContent += `\n⚠ УЯЗВИМОСТЬ: статус ${r.status} — ${JSON.stringify(d).substring(0,80)}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (уязвимый сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE89Fixed() {
+  const out = document.getElementById('demo-89f-out');
+  out.style.display = 'block';
+  out.textContent = "Логин с payload: username = \"admin' --\"";
+  try {
+    const r = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: "admin' --", password: "anything"})
+    });
+    const d = await r.json();
+    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r.status} — ${d.error}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE285() {
+  const out = document.getElementById('demo-285-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин как operator1 на уязвимой версии...';
+  try {
+    const r1 = await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'operator1', password: 'operator1'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен`;
+    const r2 = await fetch(`${API_VULN}/report`, {headers: {'Authorization': `Bearer ${tok}`}});
+    const d2 = await r2.json();
+    out.textContent += `\n⚠ УЯЗВИМОСТЬ: статус ${r2.status} — operator получил ${d2.length} записей отчёта`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (уязвимый сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE285Fixed() {
+  const out = document.getElementById('demo-285f-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин как operator1 на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'operator1', password: 'operator1'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен`;
+    const r2 = await fetch(`${API}/report`, {headers: {'Authorization': `Bearer ${tok}`}});
+    const d2 = await r2.json();
+    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+
+async function demoCWE613() {
+  const out = document.getElementById('demo-613-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин на уязвимой версии...';
+  try {
+    const r1 = await fetch(`${API_VULN}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
+    out.textContent += '\n⚠ УЯЗВИМОСТЬ: нет эндпоинта /logout — токен нельзя отозвать';
+    out.textContent += '\nТокен действителен бессрочно (нет exp в payload)';
+  } catch(e) { out.textContent += `\nОшибка: ${e.message} (уязвимый сервер не запущен на порту 5003)`; }
+}
+
+async function demoCWE613Fixed() {
+  const out = document.getElementById('demo-613f-out');
+  out.style.display = 'block';
+  out.textContent = 'Логин на защищённой версии...';
+  try {
+    const r1 = await fetch(`${API}/login`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: 'admin', password: 'admin123'})
+    });
+    const d1 = await r1.json();
+    const tok = d1.token;
+    out.textContent += `\n✓ Токен получен: ${tok.substring(0,30)}...`;
+    await fetch(`${API}/logout`, {method: 'POST', headers: {'Authorization': `Bearer ${tok}`}});
+    out.textContent += '\n✓ Logout выполнен — токен инвалидирован';
+    const r2 = await fetch(`${API}/equipment`, {headers: {'Authorization': `Bearer ${tok}`}});
+    const d2 = await r2.json();
+    out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
+  } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
 </script>
 </body>
 </html>
