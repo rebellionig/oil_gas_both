@@ -331,6 +331,65 @@
             <div id="demo-613f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
           </div>
         </div>
+        <!-- CWE-916 -->
+        <div class="panel">
+          <div class="panel-head">CWE-916 — Слабый хеш MD5 <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Пароли хранятся в MD5 без соли — взламываются за секунды радужными таблицами</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE916()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-916-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-916 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-916 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Пароли хранятся в bcrypt с солью (cost=12) — перебор невозможен</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE916Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-916f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-798 -->
+        <div class="panel">
+          <div class="panel-head">CWE-798 — Хардкод секрета <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">SECRET_KEY = "supersecret123" захардкожен в коде — любой читающий репозиторий может подписывать JWT</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE798()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-798-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- CWE-798 fixed -->
+        <div class="panel">
+          <div class="panel-head">CWE-798 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">SECRET_KEY загружается из переменной окружения .env — не хранится в коде</div>
+            <button class="btn btn-outline btn-sm" onclick="demoCWE798Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-798f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- A04 Rate Limiting -->
+        <div class="panel">
+          <div class="panel-head">A04 — Брутфорс <span style="color:var(--red);font-size:10px">УЯЗВИМАЯ</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Нет ограничения попыток входа — можно перебирать пароли бесконечно</div>
+            <button class="btn btn-outline btn-sm" onclick="demoA04()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-a04-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
+
+        <!-- A04 fixed -->
+        <div class="panel">
+          <div class="panel-head">A04 — ИСПРАВЛЕНО <span style="color:var(--green);font-size:10px">SECURE</span></div>
+          <div class="panel-body">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Rate limiting: после 10 попыток в минуту → 429 Too Many Requests</div>
+            <button class="btn btn-outline btn-sm" onclick="demoA04Fixed()">▶ ЗАПУСТИТЬ</button>
+            <div id="demo-a04f-out" class="console" style="display:none;margin-top:8px;background:var(--bg2);padding:8px;font-family:var(--mono);font-size:11px;color:var(--text2);border:1px solid var(--border);max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -893,6 +952,86 @@ async function demoCWE613Fixed() {
     const d2 = await r2.json();
     out.textContent += `\n✅ ИСПРАВЛЕНО: статус ${r2.status} — ${d2.error}`;
   } catch(e) { out.textContent += `\nОшибка: ${e.message}`; }
+}
+async function demoCWE916() {
+  const out = document.getElementById('demo-916-out');
+  out.style.display = 'block';
+  out.textContent = 'MD5 хеш пароля "admin123":';
+  out.textContent += '\n⚠ MD5: 0192023a7bbd73250516f069df18b500';
+  out.textContent += '\n⚠ Взламывается мгновенно через crackstation.net';
+  out.textContent += '\n⚠ Нет соли — одинаковые пароли дают одинаковый хеш';
+}
+
+async function demoCWE916Fixed() {
+  const out = document.getElementById('demo-916f-out');
+  out.style.display = 'block';
+  out.textContent = 'bcrypt хеш того же пароля "admin123":';
+  out.textContent += '\n✅ $2b$12$randomsalt...уникальный каждый раз';
+  out.textContent += '\n✅ cost=12: ~250ms на проверку — брутфорс невозможен';
+  out.textContent += '\n✅ Соль встроена в хеш — радужные таблицы бесполезны';
+}
+
+async function demoCWE798() {
+  const out = document.getElementById('demo-798-out');
+  out.style.display = 'block';
+  out.textContent = '⚠ УЯЗВИМОСТЬ в vulnerable версии:';
+  out.textContent += '\nSECRET_KEY = "supersecret123"  # прямо в коде';
+  out.textContent += '\n⚠ Любой с доступом к репозиторию может:';
+  out.textContent += '\n   - Подписать произвольный JWT токен';
+  out.textContent += '\n   - Получить доступ как любой пользователь';
+  out.textContent += '\n   - Изменить роль в токене на admin';
+}
+
+async function demoCWE798Fixed() {
+  const out = document.getElementById('demo-798f-out');
+  out.style.display = 'block';
+  out.textContent = '✅ ИСПРАВЛЕНО в защищённой версии:';
+  out.textContent += '\nSECRET_KEY = os.environ.get("JWT_SECRET_KEY")';
+  out.textContent += '\nif not SECRET_KEY: raise RuntimeError(...)';
+  out.textContent += '\n✅ Секрет хранится в .env (исключён из репозитория)';
+  out.textContent += '\n✅ На Railway — в Variables (зашифровано)';
+}
+
+async function demoA04() {
+  const out = document.getElementById('demo-a04-out');
+  out.style.display = 'block';
+  out.textContent = 'Отправка 5 запросов на уязвимую версию...';
+  const passwords = ['test1', 'test2', 'test3', 'test4', 'test5'];
+  for (const pwd of passwords) {
+    try {
+      const r = await fetch(`${API_VULN}/login`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: 'admin', password: pwd})
+      });
+      out.textContent += `\n⚠ Попытка "${pwd}" → статус ${r.status} (не заблокировано)`;
+    } catch(e) {
+      out.textContent += `\nОшибка: ${e.message} (сервер не запущен на порту 5003)`;
+      break;
+    }
+  }
+}
+
+async function demoA04Fixed() {
+  const out = document.getElementById('demo-a04f-out');
+  out.style.display = 'block';
+  out.textContent = 'Отправка 12 запросов на защищённую версию...';
+  let blocked = false;
+  for (let i = 1; i <= 12; i++) {
+    try {
+      const r = await fetch(`${API}/login`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: 'admin', password: `wrong${i}`})
+      });
+      if (r.status === 429) {
+        out.textContent += `\n✅ Запрос ${i}: статус 429 — Too Many Requests (заблокировано!)`;
+        blocked = true;
+        break;
+      } else {
+        out.textContent += `\nЗапрос ${i}: статус ${r.status}`;
+      }
+    } catch(e) { out.textContent += `\nОшибка: ${e.message}`; break; }
+  }
+  if (!blocked) out.textContent += '\n(лимит не достигнут за 12 запросов)';
 }
 </script>
 </body>
